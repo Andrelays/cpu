@@ -12,6 +12,9 @@ ssize_t assembler (assem_parametrs *assem, FILE *source_code_pointer, FILE *byte
     MYASSERT(source_code_pointer    != NULL, NULL_POINTER_PASSED_TO_FUNC, return NULL_POINTER_PASSED_TO_FUNC);
     MYASSERT(byte_code_pointer      != NULL, NULL_POINTER_PASSED_TO_FUNC, return NULL_POINTER_PASSED_TO_FUNC);
 
+    rewind(byte_code_pointer);
+    assem->buffer_position = 0;
+
     struct text_parametrs source_code = {
         .string_array = NULL,
         .buffer       = NULL,
@@ -26,7 +29,7 @@ ssize_t assembler (assem_parametrs *assem, FILE *source_code_pointer, FILE *byte
     {
         const char *string = ((source_code.string_array)[position]).string_pointer;
 
-        if (check_is_empty_string(string))
+        if (check_is_empty_string(string) || check_is_label(string, assem))
             continue;
 
         if (put_command_id_in_buffer(string, assem))
@@ -56,10 +59,28 @@ void replace_newline_char_and_comments(char *text)
 
 bool check_is_empty_string(const char *string)
 {
+    MYASSERT(string != NULL, NULL_POINTER_PASSED_TO_FUNC, return false);
+
     if (*string != '\n' && *string != '\0' && *string != '\r')
         return false;
 
     return true;
+}
+
+bool check_is_label(const char *string, assem_parametrs *assem)
+{
+    MYASSERT(string != NULL, NULL_POINTER_PASSED_TO_FUNC, return false);
+
+    ssize_t label_index = 0;
+
+    if (sscanf(string, ":%ld", &label_index) && label_index >= 0 && label_index <= 9)
+    {
+        assem->labels[label_index] = (int) assem->buffer_position;
+
+        return true;
+    }
+
+    return false;
 }
 
 ssize_t put_command_id_in_buffer(const char *string, assem_parametrs *assem)
@@ -72,40 +93,29 @@ ssize_t put_command_id_in_buffer(const char *string, assem_parametrs *assem)
     int number       = 0;
     char reg         = 0;
 
-    #define DEF_COMMAND(command, id, number_args, ...)                                                  \
-    do {                                                                                                \
-        if (strncmp(string, #command, sizeof #command - 1) == 0)                                        \
-        {                                                                                               \
-            command_id = command;                                                                       \
-            const char *string_without_command = string + sizeof #command;                              \
-                                                                                                        \
-            if(!check_command_args(string_without_command, number_args, &command_id, &number, &reg))    \
-                return INVALID_OPERATOR;                                                                \
-                                                                                                        \
-            push_in_bytecode_buffer(assem, command_id);                                                 \
-                                                                                                        \
-            if (number_args > 0 && command_id & COMMAND_ARGS_REGISTER)                                  \
-                push_in_bytecode_buffer(assem, reg - 'a' + 1);                                          \
-                                                                                                        \
-            if (number_args > 0 && command_id & COMMAND_ARGS_NUMBER)                                    \
-                push_in_bytecode_buffer(assem, number);                                                 \
-                                                                                                        \
-            return NO_ERROR;                                                                            \
-        }                                                                                               \
-    } while(0)
+    #define DEF_COMMAND(command, id, number_args, ...)                                                      \
+    do {                                                                                                    \
+        if (strncmp(string, #command, sizeof #command - 1) == 0)                                            \
+        {                                                                                                   \
+            command_id = command;                                                                           \
+            const char *string_without_command = string + sizeof #command;                                  \
+                                                                                                            \
+            if(!check_command_args(string_without_command, number_args, &command_id, &number, &reg, assem)) \
+                return INVALID_OPERATOR;                                                                    \
+                                                                                                            \
+            push_in_bytecode_buffer(assem, command_id);                                                     \
+                                                                                                            \
+            if (number_args > 0 && command_id & COMMAND_ARGS_REGISTER)                                      \
+                push_in_bytecode_buffer(assem, reg - 'a' + 1);                                              \
+                                                                                                            \
+            if (number_args > 0 && command_id & COMMAND_ARGS_NUMBER)                                        \
+                push_in_bytecode_buffer(assem, number);                                                     \
+                                                                                                            \
+            return NO_ERROR;                                                                                \
+        }                                                                                                   \
+    } while(0);
 
-    DEF_COMMAND(HLT,   1, 0);
-    DEF_COMMAND(PUSH,  2, 1);
-    DEF_COMMAND(SUB,   3, 0);
-    DEF_COMMAND(DIV,   4, 0);
-    DEF_COMMAND(IN,    5, 0);
-    DEF_COMMAND(OUT,   6, 0);
-    DEF_COMMAND(MUL,   7, 0);
-    DEF_COMMAND(ADD,   8, 0);
-    DEF_COMMAND(SQRT,  9, 0);
-    DEF_COMMAND(SIN,  10, 0);
-    DEF_COMMAND(COS,  11, 0);
-    DEF_COMMAND(POP,  12, 1);
+    #include "../commands.h"
 
     #undef DEF_COMMAND
 
@@ -147,7 +157,7 @@ void check_size_buffer(assem_parametrs *assem)
         assem->bytecode_buffer[index] = 0;
 }
 
-bool check_command_args(const char *string_without_command, size_t number_args, short *command_id, int *number, char *reg)
+bool check_command_args(const char *string_without_command, size_t number_args, short *command_id, int *number, char *reg, assem_parametrs *assem)
 {
     if (number_args == 0)
         return true;
@@ -157,12 +167,22 @@ bool check_command_args(const char *string_without_command, size_t number_args, 
         if (sscanf(string_without_command, "r%cx", reg) && *reg >= 'a' && *reg <= 'd')
         {
             *command_id |= COMMAND_ARGS_REGISTER;
+
             return true;
         }
 
         else if(sscanf(string_without_command, "%d", number))
         {
             *command_id |= COMMAND_ARGS_NUMBER;
+
+            return true;
+        }
+
+        else if(sscanf(string_without_command, ":%d", number))
+        {
+            *number = assem->labels[*number];
+            *command_id |= COMMAND_ARGS_NUMBER;
+
             return true;
         }
 
@@ -181,6 +201,8 @@ ssize_t assem_parametrs_constructor(assem_parametrs *assem)
     assem->bytecode_buffer = (int *) calloc(INITIAL_BUFFER_SIZE, sizeof(int));
 
     MYASSERT(assem->bytecode_buffer != NULL, FAILED_TO_ALLOCATE_DYNAM_MEMOR, return FAILED_TO_ALLOCATE_DYNAM_MEMOR);
+
+    memset(assem->labels, -1, (size_t) assem->labels_size);
 
     assem->buffer_position = 0;
     assem->buffer_size = INITIAL_BUFFER_SIZE;

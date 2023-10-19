@@ -28,6 +28,7 @@ int main(int argc, const char *argv[])
     assem_parametrs_constructor(&assem);
 
     assembler(&assem, source_code_pointer, byte_code_pointer);
+    assembler(&assem, source_code_pointer, byte_code_pointer);
 
     assem_parametrs_destructor(&assem);
 

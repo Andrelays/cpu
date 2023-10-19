@@ -1,7 +1,7 @@
 #ifndef CPU_H_INCLUDED
 #define CPU_H_INCLUDED
 
-#include "../operations.h"
+#include "../enum.h"
 #include "../libraries/Stack/stack.h"
 #include <stdio.h>
 

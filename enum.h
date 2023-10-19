@@ -1,20 +1,13 @@
 #include <stdio.h>
 
+#define DEF_COMMAND(command, id, number_args, ...) command = id,
+
 enum command {
-    INVALID_OPERATOR    = -2,
-    HLT                 =  1,
-    PUSH                =  2,
-    SUB                 =  3,
-    DIV                 =  4,
-    IN                  =  5,
-    OUT                 =  6,
-    MUL                 =  7,
-    ADD                 =  8,
-    SQRT                =  9,
-    SIN                 =  10,
-    COS                 =  11,
-    POP                 =  12
+    #include "commands.h"
+    INVALID_OPERATOR    = -1
 };
+
+#undef DEF_COMMAND
 
 enum command_args {
     COMMAND_ARGS_REGISTER            = 0b010'00000,

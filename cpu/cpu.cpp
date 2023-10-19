@@ -27,6 +27,7 @@ ssize_t processor(FILE *byte_code_pointer, FILE *logs_pointer)
 
     bytecode_parametrs_constructor(byte_code_pointer, &bytecode_info);
 
+
     // printf("buffer_size %lu\n", bytecode_info.buffer_size);
 
     //bytecode.bytecode_buffer = (int *) input_data(byte_code_pointer);
@@ -37,9 +38,18 @@ ssize_t processor(FILE *byte_code_pointer, FILE *logs_pointer)
     // for (int i = 0; i < NUMBER_OPERATIONS - 1; i++)
     //     printf("%s %d %ld %ld\n", OPERATIONS[i].name, OPERATIONS[i].id, OPERATIONS[i].size, OPERATIONS[i].number_args);
 
+    #define DEF_COMMAND(command, id, number_args, ...)  \
+        case id:                                        \
+            __VA_ARGS__                                 \
+            break;
+
     while(true)
     {
+        // printf("buffer_position = %ld\n", bytecode_info.buffer_position);
+
         int code_operator = pop_from_bytecode_buffer(&bytecode_info);
+
+        // printf("buffer_position = %ld\n", bytecode_info.buffer_position);
 
         int push_value  = 0;
         int pop_value_1 = 0;
@@ -47,119 +57,16 @@ ssize_t processor(FILE *byte_code_pointer, FILE *logs_pointer)
 
         switch (code_operator & ~COMMAND_ARGS_REGISTER_AND_NUMBER)
         {
-            case HLT:
-                stack_destructor(stk);
-                bytecode_parametrs_destructor(&bytecode_info);
-
-                return NO_ERROR;
-
-            case PUSH:
-                if (code_operator & COMMAND_ARGS_REGISTER)
-                {
-                    int reg = pop_from_bytecode_buffer(&bytecode_info);
-
-                    if (1 <= reg && reg <= 4)
-                        push_value = regs[reg - 1];
-
-                    else
-                    {
-                        printf("ERROR: INCORRECT NUMBER REG IN PUSH\n");
-                        return INVALID_OPERATOR;
-                    }
-                }
-
-                else if (code_operator & COMMAND_ARGS_NUMBER)
-                    push_value = pop_from_bytecode_buffer(&bytecode_info);
-
-                else
-                {
-                    printf("ERROR: INCORRECT NUMBER ARGS OF PUSH\n");
-                    return INVALID_OPERATOR;
-                }
-
-                push(stk, push_value * DEGREE_ACCURACY);
-                break;
-
-            case SUB:
-                pop(stk, &pop_value_2);
-                pop(stk, &pop_value_1);
-                push(stk, pop_value_1 - pop_value_2);
-                break;
-
-            case DIV:
-                pop(stk, &pop_value_2);
-                pop(stk, &pop_value_1);
-                push(stk, DEGREE_ACCURACY * pop_value_1 / pop_value_2);
-                break;
-
-            case IN:
-                scanf("%d", &push_value);
-                push(stk, push_value * DEGREE_ACCURACY);
-                break;
-
-            case OUT:
-                pop(stk, &pop_value_1);
-                printf("%g\n", (float) pop_value_1 / ((float) DEGREE_ACCURACY));
-                break;
-
-            case MUL:
-                pop(stk, &pop_value_2);
-                pop(stk, &pop_value_1);
-                push(stk, pop_value_1 * pop_value_2 / DEGREE_ACCURACY);
-                break;
-
-            case ADD:
-                pop(stk, &pop_value_2);
-                pop(stk, &pop_value_1);
-                push(stk, pop_value_1 + pop_value_2);
-                break;
-
-            case SQRT:
-                pop(stk, &pop_value_1);
-                push(stk, (int) sqrt(pop_value_1 * DEGREE_ACCURACY));
-                break;
-
-            case SIN:
-                pop(stk, &pop_value_1);
-                push(stk, (int) (sin((float) pop_value_1 / (float) DEGREE_ACCURACY) * (float) DEGREE_ACCURACY));
-                break;
-
-            case COS:
-                pop(stk, &pop_value_1);
-                push(stk, (int) (cos((float) pop_value_1 / (float) DEGREE_ACCURACY) * (float) DEGREE_ACCURACY));
-                break;
-
-            case POP:
-                pop(stk, &pop_value_1);
-
-                if (code_operator & COMMAND_ARGS_REGISTER)
-                {
-                    int reg = pop_from_bytecode_buffer(&bytecode_info);
-
-                    if (1 <= reg && reg <= 4)
-                        regs[reg - 1] = (int) ((float) pop_value_1 / ((float) DEGREE_ACCURACY));
-
-                    else
-                    {
-                        printf("ERROR: INCORRECT NUMBER REG IN POP\n");
-                        return INVALID_OPERATOR;
-                    }
-                }
-
-                else
-                {
-                    printf("ERROR: INCORRECT NUMBER ARGS OF POP\n");
-                    return INVALID_OPERATOR;
-                }
-
-                break;
+            #include "../commands.h"
 
             default:
-                printf("ERROR! Incorrect command: \"%d\"\n", code_operator);
+                printf("ERROR! Incorrect command: \"%d\" buffer_position = %ld\n", code_operator, bytecode_info.buffer_position);
                 return INVALID_OPERATOR;
         }
         code_operator = INVALID_OPERATOR;
     }
+
+    #undef DEF_COMMAND
 
     stack_destructor(stk);
     bytecode_parametrs_destructor(&bytecode_info);
