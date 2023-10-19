@@ -8,6 +8,26 @@
 FILE *Global_input_pointer  = NULL;
 FILE *Global_output_pointer = NULL;
 
+// #define COMMAND_LIST\
+//     DO(HLT)\
+//     DO(PUSH)\
+//     DO(SUB)\
+//     DO(DIV)\
+//     DO(IN)\
+//     DO(OUT)\
+//     DO(MUL)\
+//     DO(ADD)\
+//     DO(SQRT)\
+//     DO(SIN)\
+//     DO(COS)\
+//     DO(POP)
+//
+// #define DO(COMMAND)\
+//     printf("%s\n", COMMAND.name);
+//     COMMAND_LIST
+// #undef
+
+
 ssize_t disassembler(struct text_parametrs *byte_code)
 {
     MYASSERT(Global_input_pointer  != NULL, NULL_POINTER_PASSED_TO_FUNC , return NULL_POINTER_PASSED_TO_FUNC);

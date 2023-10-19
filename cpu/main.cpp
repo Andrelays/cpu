@@ -13,24 +13,18 @@ int main(int argc, const char *argv[])
     const char *file_name_input  = argv[1];
     const char *file_name_logs   = argv[2];
 
-    Global_input_pointer  = check_isopen(file_name_input,  "r");
-    Global_logs_pointer   = check_isopen(file_name_logs,   "w");
+    FILE *byte_code_pointer   = check_isopen_old(file_name_input, "rb");
+    FILE *logs_pointer = check_isopen(file_name_logs, "w");
 
-    MYASSERT(Global_input_pointer != NULL, COULD_NOT_OPEN_THE_FILE , return COULD_NOT_OPEN_THE_FILE);
-    MYASSERT(Global_logs_pointer  != NULL, COULD_NOT_OPEN_THE_FILE , return COULD_NOT_OPEN_THE_FILE);
+    MYASSERT(byte_code_pointer   != NULL, COULD_NOT_OPEN_THE_FILE , return COULD_NOT_OPEN_THE_FILE);
+    MYASSERT(logs_pointer != NULL, COULD_NOT_OPEN_THE_FILE , return COULD_NOT_OPEN_THE_FILE);
 
     Global_color_output = false;
 
-    stack *stk = get_pointer_stack();
+    processor(byte_code_pointer, logs_pointer);
 
-    STACK_CONSTRUCTOR(stk);
-
-    processor(stk);
-
-    stack_destructor(stk);
-
-    MYASSERT(check_isclose (Global_logs_pointer),  COULD_NOT_CLOSE_THE_FILE, return COULD_NOT_CLOSE_THE_FILE);
-    MYASSERT(check_isclose (Global_input_pointer), COULD_NOT_CLOSE_THE_FILE, return COULD_NOT_CLOSE_THE_FILE);
+    MYASSERT(check_isclose (byte_code_pointer),   COULD_NOT_CLOSE_THE_FILE, return COULD_NOT_CLOSE_THE_FILE);
+    MYASSERT(check_isclose (logs_pointer), COULD_NOT_CLOSE_THE_FILE, return COULD_NOT_CLOSE_THE_FILE);
 
     return 0;
 }

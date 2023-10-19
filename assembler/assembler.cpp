@@ -5,77 +5,53 @@
 #include <string.h>
 #include <ctype.h>
 
-FILE *Global_input_pointer  = NULL;
-FILE *Global_output_pointer = NULL;
-
-ssize_t assembler (struct text_parametrs *source_code)
+ssize_t assembler (assem_parametrs *assem, FILE *source_code_pointer, FILE *byte_code_pointer)
 {
-    MYASSERT(Global_input_pointer  != NULL, NULL_POINTER_PASSED_TO_FUNC , return NULL_POINTER_PASSED_TO_FUNC);
-    MYASSERT(Global_output_pointer != NULL, NULL_POINTER_PASSED_TO_FUNC , return NULL_POINTER_PASSED_TO_FUNC);
+    MYASSERT(assem                  != NULL, NULL_POINTER_PASSED_TO_FUNC, return NULL_POINTER_PASSED_TO_FUNC);
+    MYASSERT(assem->bytecode_buffer != NULL, NULL_POINTER_PASSED_TO_FUNC, return NULL_POINTER_PASSED_TO_FUNC);
+    MYASSERT(source_code_pointer    != NULL, NULL_POINTER_PASSED_TO_FUNC, return NULL_POINTER_PASSED_TO_FUNC);
+    MYASSERT(byte_code_pointer      != NULL, NULL_POINTER_PASSED_TO_FUNC, return NULL_POINTER_PASSED_TO_FUNC);
 
-    replace_newline_char(source_code->buffer);
+    struct text_parametrs source_code = {
+        .string_array = NULL,
+        .buffer       = NULL,
+        .number_lines = 0
+    };
 
-    for (size_t line_counter = 0; line_counter < source_code->number_lines; line_counter++)
+    constructor(&source_code, source_code_pointer);
+
+    replace_newline_char_and_comments(source_code.buffer);
+
+    for (size_t position = 0; position < source_code.number_lines; position++)
     {
-        const char *string = ((source_code->string_array)[line_counter]).string_pointer;
+        const char *string = ((source_code.string_array)[position]).string_pointer;
 
         if (check_is_empty_string(string))
             continue;
 
-        operators code_operator = find_operator(string);
-
-        if(!check_is_correct_operator(code_operator, line_counter + 1, string))
-            return INVALID_COMMAND;
-
-        if(code_operator == PUSH && !check_is_correct_number_push(string, line_counter + 1))
-            return INVALID_COMMAND;
-
-        if(code_operator != PUSH)
-            fprintf(Global_output_pointer, "%d\n", code_operator);
-
-        else
-            fprintf(Global_output_pointer, "%d%s\n", code_operator, string + sizeof "PUSH" - 1);
+        if (put_command_id_in_buffer(string, assem))
+            return INVALID_OPERATOR;
     }
+
+    fwrite(assem->bytecode_buffer, sizeof(int), (size_t) assem->buffer_position, byte_code_pointer);
+
+    // for (ssize_t i = 0; i < assem->buffer_position; i ++)
+    //     fprintf(byte_code_pointer, "\n%d\n", assem->bytecode_buffer[i]);
+
+    destructor(&source_code);
 
     return NO_ERROR;
 }
 
-void replace_newline_char(char *text)
+void replace_newline_char_and_comments(char *text)
 {
     while (*text != '\0')
     {
-        if (*text == '\r' || *text == '\n')
+        if (*text == '\r' || *text == '\n' || *text == ';')
             *text = '\0';
 
         ++text;
     }
-}
-
-operators find_operator (const char *string)
-{
-    MYASSERT(string != NULL, NULL_POINTER_PASSED_TO_FUNC, return NO_OPERATOR);
-
-    #define CHECK_OPERATOR_(command)                                                        \
-    do {                                                                                    \
-        if (strncmp(string, #command, sizeof #command - 1) == 0) return command;            \
-    } while(0)
-
-    CHECK_OPERATOR_(HLT);
-    CHECK_OPERATOR_(PUSH);
-    CHECK_OPERATOR_(SUB);
-    CHECK_OPERATOR_(DIV);
-    CHECK_OPERATOR_(IN);
-    CHECK_OPERATOR_(OUT);
-    CHECK_OPERATOR_(MUL);
-    CHECK_OPERATOR_(ADD);
-    CHECK_OPERATOR_(SQRT);
-    CHECK_OPERATOR_(SIN);
-    CHECK_OPERATOR_(COS);
-    CHECK_OPERATOR_(POP);
-
-    #undef CHECK_OPERATOR_
-
-    return NO_OPERATOR;
 }
 
 bool check_is_empty_string(const char *string)
@@ -86,31 +62,145 @@ bool check_is_empty_string(const char *string)
     return true;
 }
 
-bool check_is_correct_operator(operators code_operator, size_t line_number, const char *string)
+ssize_t put_command_id_in_buffer(const char *string, assem_parametrs *assem)
 {
-    if (code_operator != NO_OPERATOR)
+    MYASSERT(string                 != NULL, NULL_POINTER_PASSED_TO_FUNC, return NULL_POINTER_PASSED_TO_FUNC);
+    MYASSERT(assem                  != NULL, NULL_POINTER_PASSED_TO_FUNC, return NULL_POINTER_PASSED_TO_FUNC);
+    MYASSERT(assem->bytecode_buffer != NULL, NULL_POINTER_PASSED_TO_FUNC, return NULL_POINTER_PASSED_TO_FUNC);
+
+    short command_id = INVALID_OPERATOR;
+    int number       = 0;
+    char reg         = 0;
+
+    #define DEF_COMMAND(command, id, number_args, ...)                                                  \
+    do {                                                                                                \
+        if (strncmp(string, #command, sizeof #command - 1) == 0)                                        \
+        {                                                                                               \
+            command_id = command;                                                                       \
+            const char *string_without_command = string + sizeof #command;                              \
+                                                                                                        \
+            if(!check_command_args(string_without_command, number_args, &command_id, &number, &reg))    \
+                return INVALID_OPERATOR;                                                                \
+                                                                                                        \
+            push_in_bytecode_buffer(assem, command_id);                                                 \
+                                                                                                        \
+            if (number_args > 0 && command_id & COMMAND_ARGS_REGISTER)                                  \
+                push_in_bytecode_buffer(assem, reg - 'a' + 1);                                          \
+                                                                                                        \
+            if (number_args > 0 && command_id & COMMAND_ARGS_NUMBER)                                    \
+                push_in_bytecode_buffer(assem, number);                                                 \
+                                                                                                        \
+            return NO_ERROR;                                                                            \
+        }                                                                                               \
+    } while(0)
+
+    DEF_COMMAND(HLT,   1, 0);
+    DEF_COMMAND(PUSH,  2, 1);
+    DEF_COMMAND(SUB,   3, 0);
+    DEF_COMMAND(DIV,   4, 0);
+    DEF_COMMAND(IN,    5, 0);
+    DEF_COMMAND(OUT,   6, 0);
+    DEF_COMMAND(MUL,   7, 0);
+    DEF_COMMAND(ADD,   8, 0);
+    DEF_COMMAND(SQRT,  9, 0);
+    DEF_COMMAND(SIN,  10, 0);
+    DEF_COMMAND(COS,  11, 0);
+    DEF_COMMAND(POP,  12, 1);
+
+    #undef DEF_COMMAND
+
+    printf("ERROR COMMAND: %s\n", string);
+
+    return INVALID_OPERATOR;
+}
+
+void push_in_bytecode_buffer(assem_parametrs *assem, int number)
+{
+    MYASSERT(assem                  != NULL, NULL_POINTER_PASSED_TO_FUNC, return);
+    MYASSERT(assem->bytecode_buffer != NULL, NULL_POINTER_PASSED_TO_FUNC, return);
+
+    // printf("%d ", number);
+
+    check_size_buffer(assem);
+
+    assem->bytecode_buffer[assem->buffer_position] = number;
+    ++assem->buffer_position;
+}
+
+void check_size_buffer(assem_parametrs *assem)
+{
+    MYASSERT(assem                  != NULL, NULL_POINTER_PASSED_TO_FUNC, return);
+    MYASSERT(assem->bytecode_buffer != NULL, NULL_POINTER_PASSED_TO_FUNC, return);
+
+    if (assem->buffer_position < assem->buffer_size)
+        return;
+
+    const int COEFFICIENT_BUFFER_INCREASE = 2;
+
+    assem->buffer_size *= COEFFICIENT_BUFFER_INCREASE;
+
+    assem->bytecode_buffer = (int *) realloc (assem->bytecode_buffer, (size_t) assem->buffer_size * sizeof(int));
+
+    MYASSERT(assem->bytecode_buffer != NULL, FAILED_TO_ALLOCATE_DYNAM_MEMOR, return);
+
+    for (ssize_t index = assem->buffer_position; index < assem->buffer_size;index++)
+        assem->bytecode_buffer[index] = 0;
+}
+
+bool check_command_args(const char *string_without_command, size_t number_args, short *command_id, int *number, char *reg)
+{
+    if (number_args == 0)
         return true;
 
-    printf("ERROR! Invalid command name, line %lu: \"%s\"\n", line_number, string);
+    if (number_args == 1)
+    {
+        if (sscanf(string_without_command, "r%cx", reg) && *reg >= 'a' && *reg <= 'd')
+        {
+            *command_id |= COMMAND_ARGS_REGISTER;
+            return true;
+        }
+
+        else if(sscanf(string_without_command, "%d", number))
+        {
+            *command_id |= COMMAND_ARGS_NUMBER;
+            return true;
+        }
+
+        printf("ERROR COMMAND ARGS: %s\n", string_without_command);
+    }
 
     return false;
 }
 
-bool check_is_correct_number_push(const char *string, size_t line_number)
+ssize_t assem_parametrs_constructor(assem_parametrs *assem)
 {
-    const char *string_whithout_command = string + sizeof "PUSH";
+    MYASSERT(assem != NULL, NULL_POINTER_PASSED_TO_FUNC, return NULL_POINTER_PASSED_TO_FUNC);
 
-    while (*string_whithout_command != '\0')
-    {
-        if (!isspace(*string_whithout_command) && !isdigit(*string_whithout_command))
-        {
-            printf("ERROR! Invalid PUSH number, line %lu: \"%s\"\n", line_number, string);
+    const ssize_t INITIAL_BUFFER_SIZE = 100;
 
-            return false;
-        }
+    assem->bytecode_buffer = (int *) calloc(INITIAL_BUFFER_SIZE, sizeof(int));
 
-        ++string_whithout_command;
-    }
+    MYASSERT(assem->bytecode_buffer != NULL, FAILED_TO_ALLOCATE_DYNAM_MEMOR, return FAILED_TO_ALLOCATE_DYNAM_MEMOR);
 
-    return true;
+    assem->buffer_position = 0;
+    assem->buffer_size = INITIAL_BUFFER_SIZE;
+
+    return NO_ERROR;
 }
+
+ssize_t assem_parametrs_destructor(assem_parametrs *assem)
+{
+    MYASSERT(assem                  != NULL, NULL_POINTER_PASSED_TO_FUNC, return NULL_POINTER_PASSED_TO_FUNC);
+    MYASSERT(assem->bytecode_buffer != NULL, NULL_POINTER_PASSED_TO_FUNC, return NULL_POINTER_PASSED_TO_FUNC);
+
+    assem->buffer_position = -1;
+    assem->buffer_size     = -1;
+
+    free(assem->bytecode_buffer);
+
+    assem->bytecode_buffer = NULL;
+    assem = NULL;
+
+    return NO_ERROR;
+}
+

@@ -1,9 +1,7 @@
-PUSH 10
-PUSH 11
-ADD 
-COS 
-OUT 
-PUSH 1
-SIN 
-OUT 
-HLT 
+PUSH 16 ; ssss
+POP rax
+PUSH rax
+PUSH rax
+MUL
+OUT
+HLT

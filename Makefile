@@ -5,7 +5,6 @@ cpu_dir          = cpu
 release:
 	cd $(assembler_dir) 	&& make release
 	cd $(cpu_dir)       	&& make release
-	cd $(disassembler_dir)  && make release
 
 clean:
 	cd $(assembler_dir) 	&& make clean
