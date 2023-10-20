@@ -2,6 +2,7 @@
 #define ASSEMBLER_H_INCLUDED
 
 #include "../enum.h"
+#include "../libraries/Onegin/onegin.h"
 #include <stdio.h>
 
 const int SIZE_ARRAY_LABELS = 10;
@@ -14,11 +15,11 @@ struct assem_parametrs {
     ssize_t              buffer_position;
 };
 
-ssize_t assembler (assem_parametrs *assem, FILE *source_code_pointer, FILE *byte_code_pointer);
+ssize_t assembler (assem_parametrs *assem, FILE *source_code_pointer, FILE *byte_code_pointer, FILE *listening_file_pointer);
 
 void replace_newline_char_and_comments(char *text);
 
-ssize_t put_command_id_in_buffer(const char *string, assem_parametrs *assem);
+ssize_t put_command_id_in_buffer(const char *string, assem_parametrs *assem, FILE *listening_file_pointer);
 
 void push_in_bytecode_buffer(assem_parametrs *assem, int number);
 
@@ -31,5 +32,7 @@ bool check_is_label(const char *string, assem_parametrs *assem);
 ssize_t assem_parametrs_constructor(assem_parametrs *assem);
 
 ssize_t assem_parametrs_destructor(assem_parametrs *assem);
+
+void output_to_listening_file(const char *string, size_t number_args, FILE *listening_file_pointer, assem_parametrs *assem);
 
 #endif //ASSEMBLER_H_INCLUDED

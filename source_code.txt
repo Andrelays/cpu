@@ -1,6 +1,5 @@
 PUSH 1 ; ssss
 POP rax
-:3
 PUSH rax
 PUSH rax
 MUL
@@ -11,5 +10,10 @@ ADD
 POP rax
 PUSH rax
 PUSH 10
-JB :3
+JB 3:
 HLT
+PUSH 1
+POP rax
+3:
+PUSH rax
+PUSH rax
