@@ -1,5 +1,5 @@
 #include "cpu.h"
-#include "../libraries/Stack/myassert.h"
+#include "../libraries/Onegin/myassert.h"
 #include "../libraries/Onegin/onegin.h"
 #include "../libraries/Stack/stack.h"
 #include <math.h>
@@ -39,7 +39,7 @@ ssize_t processor(FILE *byte_code_pointer, FILE *logs_pointer)
     //     printf("%s %d %ld %ld\n", OPERATIONS[i].name, OPERATIONS[i].id, OPERATIONS[i].size, OPERATIONS[i].number_args);
 
     #define DEF_COMMAND(command, id, number_args, ...)  \
-        case id:                                        \
+        case (id & ~COMMAND_ARGS_ALL):                  \
             __VA_ARGS__                                 \
             break;
 
@@ -55,7 +55,7 @@ ssize_t processor(FILE *byte_code_pointer, FILE *logs_pointer)
         int pop_value_1 = 0;
         int pop_value_2 = 0;
 
-        switch (code_operator & ~COMMAND_ARGS_REGISTER_AND_NUMBER)
+        switch (code_operator & ~COMMAND_ARGS_ALL)
         {
             #include "../commands.h"
 

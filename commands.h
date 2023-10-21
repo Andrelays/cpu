@@ -1,9 +1,9 @@
-DEF_COMMAND(HLT,   1, 0,
+DEF_COMMAND(HLT,  -1, 0,
 {
     stack_destructor(stk);
     bytecode_parametrs_destructor(&bytecode_info);
 
-    return NO_ERROR;
+    return ASSERT_NO_ERROR;
 })
 
 
@@ -57,13 +57,19 @@ DEF_COMMAND(IN,    5, 0,
     push(stk, push_value * DEGREE_ACCURACY);
 })
 
-DEF_COMMAND(OUT,   6, 0,
+DEF_COMMAND(OUTC, 6, 0,
+{
+    pop(stk, &pop_value_1);
+    printf("%c", pop_value_1 / DEGREE_ACCURACY);
+})
+
+DEF_COMMAND(OUT,   7, 0,
 {
     pop(stk, &pop_value_1);
     printf("%g\n", (float) pop_value_1 / ((float) DEGREE_ACCURACY));
 })
 
-DEF_COMMAND(MUL,   7, 0,
+DEF_COMMAND(MUL,   8, 0,
 {
     pop(stk, &pop_value_2);
     pop(stk, &pop_value_1);
@@ -71,7 +77,7 @@ DEF_COMMAND(MUL,   7, 0,
     push(stk, pop_value_1 * pop_value_2 / DEGREE_ACCURACY);
 })
 
-DEF_COMMAND(ADD,   8, 0,
+DEF_COMMAND(ADD,   9, 0,
 {
     pop(stk, &pop_value_2);
     pop(stk, &pop_value_1);
@@ -79,25 +85,25 @@ DEF_COMMAND(ADD,   8, 0,
     push(stk, pop_value_1 + pop_value_2);
 })
 
-DEF_COMMAND(SQRT,  9, 0,
+DEF_COMMAND(SQRT,  10, 0,
 {
     pop(stk, &pop_value_1);
     push(stk, (int) sqrt(pop_value_1 * DEGREE_ACCURACY));
 })
 
-DEF_COMMAND(SIN,  10, 0,
+DEF_COMMAND(SIN,  11, 0,
 {
     pop(stk, &pop_value_1);
     push(stk, (int) (sin((float) pop_value_1 / (float) DEGREE_ACCURACY) * (float) DEGREE_ACCURACY));
 })
 
-DEF_COMMAND(COS,  11, 0,
+DEF_COMMAND(COS,  12, 0,
 {
     pop(stk, &pop_value_1);
     push(stk, (int) (cos((float) pop_value_1 / (float) DEGREE_ACCURACY) * (float) DEGREE_ACCURACY));
 })
 
-DEF_COMMAND(POP,  12, 1,
+DEF_COMMAND(POP,  13, 1,
 {
     pop(stk, &pop_value_1);
 
@@ -122,12 +128,12 @@ DEF_COMMAND(POP,  12, 1,
     }
 })
 
-DEF_COMMAND(JMP,  13, 1,
+DEF_COMMAND(JMP,  14, 1,
 {
     bytecode_info.buffer_position = bytecode_info.buffer[bytecode_info.buffer_position];
 })
 
-DEF_COMMAND(JA,  14, 1,
+DEF_COMMAND(JA,  15, 1,
 {
     pop(stk, &pop_value_2);
     pop(stk, &pop_value_1);
@@ -139,7 +145,7 @@ DEF_COMMAND(JA,  14, 1,
         ++bytecode_info.buffer_position;
 })
 
-DEF_COMMAND(JAE,  15, 1,
+DEF_COMMAND(JAE,  16, 1,
 {
     pop(stk, &pop_value_2);
     pop(stk, &pop_value_1);
@@ -151,7 +157,7 @@ DEF_COMMAND(JAE,  15, 1,
         ++bytecode_info.buffer_position;
 })
 
-DEF_COMMAND(JB,  16, 1,
+DEF_COMMAND(JB,  17, 1,
 {
     pop(stk, &pop_value_2);
     pop(stk, &pop_value_1);
@@ -163,7 +169,7 @@ DEF_COMMAND(JB,  16, 1,
         ++bytecode_info.buffer_position;
 })
 
-DEF_COMMAND(JBE,  17, 1,
+DEF_COMMAND(JBE,  18, 1,
 {
     pop(stk, &pop_value_2);
     pop(stk, &pop_value_1);
@@ -175,7 +181,7 @@ DEF_COMMAND(JBE,  17, 1,
         ++bytecode_info.buffer_position;
 })
 
-DEF_COMMAND(JE,  18, 1,
+DEF_COMMAND(JE,  19, 1,
 {
     pop(stk, &pop_value_2);
     pop(stk, &pop_value_1);
@@ -187,7 +193,7 @@ DEF_COMMAND(JE,  18, 1,
         ++bytecode_info.buffer_position;
 })
 
-DEF_COMMAND(JNE,  19, 1,
+DEF_COMMAND(JNE,  20, 1,
 {
     pop(stk, &pop_value_2);
     pop(stk, &pop_value_1);
@@ -199,4 +205,14 @@ DEF_COMMAND(JNE,  19, 1,
         ++bytecode_info.buffer_position;
 })
 
+DEF_COMMAND(CALL,  21, 1,
+{
+    regs[0] = (int) bytecode_info.buffer_position + 1;
+    bytecode_info.buffer_position = bytecode_info.buffer[bytecode_info.buffer_position];
+})
+
+DEF_COMMAND(RETURN, 22, 0,
+{
+    bytecode_info.buffer_position = regs[0];
+})
 

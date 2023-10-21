@@ -14,7 +14,7 @@
  do {                                                                                                               \
     if (!(condition))                                                                                               \
     {                                                                                                               \
-        printf(MAGENTA "suddenly: Logical error: Error code: %s\n", #error_code);                                    \
+        printf(MAGENTA "suddenly: Logical error: Error code: %s\n", #error_code);                                   \
         printf("File: %s\n" "line: %d\n" "Function: %s\n" RESET_COLOR, __FILE__, __LINE__, __PRETTY_FUNCTION__);    \
                                                                                                                     \
         finish;                                                                                                     \
@@ -37,7 +37,7 @@ enum errors_code {
     FAILED_TO_ALLOCATE_DYNAM_MEMOR  = 6,
     COULD_NOT_OPEN_THE_FILE         = 7,
     COULD_NOT_CLOSE_THE_FILE        = 8,
-    HASH_HAS_BEEN_CHANGED           = 9
+    INVALID_OPERATOR                = 9
 };
 
 

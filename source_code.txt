@@ -1,19 +1,24 @@
-PUSH 1 ; ssss
-POP rax
-PUSH rax
-PUSH rax
+PUSH 1
+POP rbx
+CALL :CALCULATE_SQUARES     ;print square of number
+HLT
+
+:CALCULATE_SQUARES
+PUSH 1
+OUT
+:CALCULATE_NEW_SQUARE
+PUSH rbx
+PUSH rbx
 MUL
 OUT
-PUSH rax
+PUSH rbx
 PUSH 1
 ADD
-POP rax
-PUSH rax
+POP rbx
+PUSH rbx
 PUSH 10
-JB 3:
+JB :CALCULATE_NEW_SQUARE
+RETURN
 HLT
-PUSH 1
-POP rax
-3:
-PUSH rax
-PUSH rax
+
+

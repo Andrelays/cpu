@@ -4,7 +4,7 @@
 
 enum command {
     #include "commands.h"
-    INVALID_OPERATOR    = -1
+    NO_OPERATOR    = 0
 };
 
 #undef DEF_COMMAND
@@ -12,7 +12,7 @@ enum command {
 enum command_args {
     COMMAND_ARGS_REGISTER            = 0b010'00000,
     COMMAND_ARGS_NUMBER              = 0b001'00000,
-    COMMAND_ARGS_REGISTER_AND_NUMBER = 0b011'00000
+    COMMAND_ARGS_ALL                 = 0b111'00000
 };
 
 // struct operation {
