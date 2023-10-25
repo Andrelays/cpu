@@ -22,9 +22,9 @@ struct assem_parametrs {
     ssize_t              buffer_position;
 };
 
-errors_code assembler (assem_parametrs *assem, FILE *source_code_pointer, FILE *byte_code_pointer, FILE *listening_file_pointer);
+errors_code assembler (assem_parametrs *assem, FILE *source_code_pointer, FILE *byte_code_pointer, FILE *listing_file_pointer);
 
-errors_code put_command_id_in_buffer(const char *string, assem_parametrs *assem, FILE *listening_file_pointer);
+errors_code put_command_id_in_buffer(char *string, assem_parametrs *assem, FILE *listing_file_pointer);
 
 errors_code replace_newline_char_and_comments(char *text);
 
@@ -32,16 +32,29 @@ errors_code push_in_bytecode_buffer(assem_parametrs *assem, int number);
 
 errors_code check_size_buffer(assem_parametrs *assem);
 
-bool check_command_args(const char *string_without_command, size_t number_args, short *command_id, int *number, char *reg, assem_parametrs *assem);
+bool check_command_args(char *string_without_command, size_t number_args, short *command_id, int *number, char *reg, assem_parametrs *assem, ssize_t arg_len);
+
 bool check_is_empty_string(const char *string);
-bool check_is_label(const char *string, assem_parametrs *assem);
+bool check_is_label(char *string, assem_parametrs *assem);
 
 errors_code assem_parametrs_constructor(assem_parametrs *assem);
 
 errors_code assem_parametrs_destructor(assem_parametrs *assem);
 
-errors_code output_to_listening_file(const char *string, size_t number_args, FILE *listening_file_pointer, assem_parametrs *assem);
+errors_code output_to_listing_file(const char *string, size_t number_args, FILE *listing_file_pointer, assem_parametrs *assem);
 
 ssize_t find_label(char *label, assem_parametrs *assem);
+
+errors_code putn(char symbol, size_t number_symbols, FILE *file);
+
+char *parsing_string_to_tokens(char *string, ssize_t *token_length, const char *separator);
+
+bool check_is_register(char *string_without_command, char *reg, ssize_t arg_len);
+
+bool check_is_number(char *string_without_command, int *number, ssize_t arg_len);
+
+errors_code translate_var_to_binary_and_print(int number, FILE *file);
+
+ssize_t find_token_size(char *token, const char *separator);
 
 #endif //ASSEMBLER_H_INCLUDED

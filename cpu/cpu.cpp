@@ -14,7 +14,9 @@ ssize_t processor(FILE *byte_code_pointer, FILE *logs_pointer)
 
     Global_logs_pointer = logs_pointer;
 
-    int regs[4] = {};
+    int memory[MEMORY_SIZE] = {};
+
+    int regs[NUMBER_OF_REGISTERS] = {};
 
     stack *stk = get_pointer_stack();
     STACK_CONSTRUCTOR(stk);
@@ -43,7 +45,9 @@ ssize_t processor(FILE *byte_code_pointer, FILE *logs_pointer)
             __VA_ARGS__                                 \
             break;
 
-    while(true)
+    // TODO WARNING HLT 31st command
+
+    while(bytecode_info.buffer_position < bytecode_info.buffer_size)
     {
         // printf("buffer_position = %ld\n", bytecode_info.buffer_position);
 
@@ -68,6 +72,8 @@ ssize_t processor(FILE *byte_code_pointer, FILE *logs_pointer)
 
     #undef DEF_COMMAND
 
+    printf("ERROR: Not HLT\n");
+
     stack_destructor(stk);
     bytecode_parametrs_destructor(&bytecode_info);
 
@@ -79,9 +85,9 @@ ssize_t bytecode_parametrs_constructor(FILE *byte_code_pointer, bytecode_paramet
     MYASSERT(byte_code_pointer != NULL, NULL_POINTER_PASSED_TO_FUNC , return NULL_POINTER_PASSED_TO_FUNC);
     MYASSERT(bytecode_info     != NULL, NULL_POINTER_PASSED_TO_FUNC , return NULL_POINTER_PASSED_TO_FUNC);
 
-    size_t file_size = determine_size(byte_code_pointer) / sizeof(int);
+    size_t file_size = determine_size(byte_code_pointer) / sizeof(int); //TODO int->char
 
-    bytecode_info->buffer = (int *)calloc(file_size, sizeof(int));
+    bytecode_info->buffer = (int *)calloc(file_size + 1, sizeof(int));
     MYASSERT(bytecode_info->buffer != NULL, FAILED_TO_ALLOCATE_DYNAM_MEMOR, return FAILED_TO_ALLOCATE_DYNAM_MEMOR);
 
     bytecode_info->buffer_size = (ssize_t) fread(bytecode_info->buffer, sizeof(int), file_size, byte_code_pointer);
@@ -101,8 +107,6 @@ ssize_t bytecode_parametrs_destructor(bytecode_parametrs *bytecode_info)
 
     bytecode_info->buffer_position = -1;
     bytecode_info->buffer_size = -1;
-
-    bytecode_info = NULL;
 
     return NO_ERROR;
 }

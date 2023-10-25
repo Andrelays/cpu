@@ -5,6 +5,8 @@
 #include "../libraries/Stack/stack.h"
 #include <stdio.h>
 
+const ssize_t MEMORY_SIZE = 100;
+
 struct bytecode_parametrs {
     int                 *buffer;
     ssize_t              buffer_size;

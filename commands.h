@@ -9,11 +9,30 @@ DEF_COMMAND(HLT,  -1, 0,
 
 DEF_COMMAND(PUSH,  2, 1,
 {
-    if (code_operator & COMMAND_ARGS_REGISTER)
+    // MASK_LOWER(3) -> 0b0000'0111
+    // MASK_LOWER(N) ((1u << (N)) - 1)
+
+    int mem_reg = ((code_operator >> 5) & 0x7); //TODO switch
+    switch(mem_reg)
+    if (code_operator & COMMAND_ARGS_MEMORY_REGISTER)
     {
         int reg = pop_from_bytecode_buffer(&bytecode_info);
 
-        if (1 <= reg && reg <= 4)
+        if (1 <= reg && reg <= NUMBER_OF_REGISTERS)
+            push_value = regs[reg - 1];
+
+        else
+        {
+            printf("ERROR: INCORRECT NUMBER REG IN PUSH\n");
+            return INVALID_OPERATOR;
+        }
+    }
+
+    else if (code_operator & COMMAND_ARGS_REGISTER)
+    {
+        int reg = pop_from_bytecode_buffer(&bytecode_info);
+
+        if (1 <= reg && reg <= NUMBER_OF_REGISTERS)
             push_value = regs[reg - 1];
 
         else
@@ -48,7 +67,7 @@ DEF_COMMAND(DIV,   4, 0,
     pop(stk, &pop_value_2);
     pop(stk, &pop_value_1);
 
-    push(stk, DEGREE_ACCURACY * pop_value_1 / pop_value_2);
+    push(stk, DEGREE_ACCURACY * pop_value_1 / pop_value_2); //TODO chaeck zero val 2
 })
 
 DEF_COMMAND(IN,    5, 0,
@@ -74,7 +93,7 @@ DEF_COMMAND(MUL,   8, 0,
     pop(stk, &pop_value_2);
     pop(stk, &pop_value_1);
 
-    push(stk, pop_value_1 * pop_value_2 / DEGREE_ACCURACY);
+    push(stk, pop_value_1 * pop_value_2 / DEGREE_ACCURACY); //TODO check overflow
 })
 
 DEF_COMMAND(ADD,   9, 0,
@@ -87,7 +106,7 @@ DEF_COMMAND(ADD,   9, 0,
 
 DEF_COMMAND(SQRT,  10, 0,
 {
-    pop(stk, &pop_value_1);
+    pop(stk, &pop_value_1); // TODO: check that pop did not fail
     push(stk, (int) sqrt(pop_value_1 * DEGREE_ACCURACY));
 })
 
@@ -111,7 +130,7 @@ DEF_COMMAND(POP,  13, 1,
     {
         int reg = pop_from_bytecode_buffer(&bytecode_info);
 
-        if (1 <= reg && reg <= 4)
+        if (1 <= reg && reg <= NUMBER_OF_REGISTERS)
             regs[reg - 1] = (int) ((float) pop_value_1 / ((float) DEGREE_ACCURACY));
 
         else
@@ -154,7 +173,7 @@ DEF_COMMAND(JAE,  16, 1,
         bytecode_info.buffer_position = bytecode_info.buffer[bytecode_info.buffer_position];
 
     else
-        ++bytecode_info.buffer_position;
+        ++bytecode_info.buffer_position; // TODO: define JUMP(>=)
 })
 
 DEF_COMMAND(JB,  17, 1,
@@ -207,12 +226,26 @@ DEF_COMMAND(JNE,  20, 1,
 
 DEF_COMMAND(CALL,  21, 1,
 {
-    regs[0] = (int) bytecode_info.buffer_position + 1;
+    push(stk, (int) bytecode_info.buffer_position + 1);
     bytecode_info.buffer_position = bytecode_info.buffer[bytecode_info.buffer_position];
 })
 
 DEF_COMMAND(RETURN, 22, 0,
 {
-    bytecode_info.buffer_position = regs[0];
+    pop(stk, &pop_value_1);
+    bytecode_info.buffer_position = pop_value_1;
 })
 
+DEF_COMMAND(DRAW, 23, 0,
+{
+    for (ssize_t memory_index = 0; memory_index < MEMORY_SIZE; memory_index++)
+    {
+        if (!memory[memory_index])
+            printf(".");
+
+        else
+            printf("*");
+    }
+
+    printf("\n");
+})

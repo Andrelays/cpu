@@ -10,13 +10,13 @@ struct text_parametrs {
 };
 
 struct string_parametrs {
-    const char      *string_pointer;
+    char            *string_pointer;
     size_t           size_string;
 };
 
 typedef int (*compare_func) (const void *, const void *);
 
-void constructor(struct text_parametrs *text, FILE *file_pointer);
+void text_parametrs_constructor(struct text_parametrs *text, FILE *file_pointer);
 
 char *input_data(FILE *file_pointer);
 size_t determine_size(FILE *file_pointer);
@@ -35,7 +35,7 @@ const char *back_to_alpha(const char *string, const char *end_string);
 void output_data(const struct text_parametrs *text, FILE *file_pointer);
 void print_string(const char *string, FILE *file_pointer);
 
-void destructor(struct text_parametrs *text);
+void text_parametrs_destructor(struct text_parametrs *text);
 
 int compare_int (const void *number_1, const void *number_2);
 void swap_values(void* value_1, void* value_2, const size_t size_elements);
