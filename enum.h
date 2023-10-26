@@ -1,3 +1,6 @@
+#ifndef ENUM_H_INCLUDED
+#define ENUM_H_INCLUDED
+
 #include <stdio.h>
 
 const ssize_t NUMBER_OF_REGISTERS = 4;
@@ -53,3 +56,5 @@ enum command_args {
 // r - регистр
 // i - immed (push 5 5 - immed)
 // ----- -
+
+#endif //ENUM_H_INCLUDED

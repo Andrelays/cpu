@@ -1,4 +1,4 @@
-PUSH 1        ;coly
+PUSH [1]        ;coly
 POP rbx
 DRAW
 CALL CALCULATE_SQUARES:
@@ -6,13 +6,12 @@ HLT
 
 CALCULATE_SQUARES:
 PUSH [10]
-OUT
+OUT ;asas
 CALCULATE_NEW_SQUARE:
 PUSH rbx
 PUSH rbx
 MUL
 OUT
-PUSH rbx
 PUSH 1
 ADD
 POP rbx

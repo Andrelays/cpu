@@ -28,10 +28,10 @@ int main(int argc, const char *argv[])
     MYASSERT(byte_code_file_pointer   != NULL, COULD_NOT_OPEN_THE_FILE , return COULD_NOT_OPEN_THE_FILE);
     MYASSERT(listing_file_pointer     != NULL, COULD_NOT_OPEN_THE_FILE , return COULD_NOT_OPEN_THE_FILE);
 
-    assem_parametrs_constructor(&assem);
+    assem_parametrs_constructor(&assem, source_code_file_pointer);
 
-    assembler(&assem, source_code_file_pointer, byte_code_file_pointer, listing_file_pointer);
-    assembler(&assem, source_code_file_pointer, byte_code_file_pointer, listing_file_pointer);
+    assembler(&assem, byte_code_file_pointer, listing_file_pointer);
+    assembler(&assem, byte_code_file_pointer, listing_file_pointer);
 
     assem_parametrs_destructor(&assem);
 
