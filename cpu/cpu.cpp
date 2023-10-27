@@ -14,8 +14,7 @@ ssize_t processor(FILE *byte_code_pointer, FILE *logs_pointer)
 
     Global_logs_pointer = logs_pointer;
 
-    int memory[MEMORY_SIZE] = {};
-
+    int memory[MEMORY_SIZE]       = {};
     int regs[NUMBER_OF_REGISTERS] = {};
 
     stack *stk = get_pointer_stack();
@@ -29,35 +28,19 @@ ssize_t processor(FILE *byte_code_pointer, FILE *logs_pointer)
 
     bytecode_parametrs_constructor(byte_code_pointer, &bytecode_info);
 
-
-    // printf("buffer_size %lu\n", bytecode_info.buffer_size);
-
-    //bytecode.bytecode_buffer = (int *) input_data(byte_code_pointer);
-
-    // for (int i = 0; i < 100; i++)
-    //     printf("%d\n", pop_from_bytecode_buffer(&bytecode_info));
-
-    // for (int i = 0; i < NUMBER_OPERATIONS - 1; i++)
-    //     printf("%s %d %ld %ld\n", OPERATIONS[i].name, OPERATIONS[i].id, OPERATIONS[i].size, OPERATIONS[i].number_args);
-
     #define DEF_COMMAND(command, id, number_args, ...)  \
         case (id & ~COMMAND_ARGS_ALL):                  \
             __VA_ARGS__                                 \
             break;
 
-    // TODO WARNING HLT 31st command
-
     while(bytecode_info.buffer_position < bytecode_info.buffer_size)
     {
-        // printf("buffer_position = %ld\n", bytecode_info.buffer_position);
-
         int code_operator = pop_from_bytecode_buffer(&bytecode_info);
 
-        // printf("buffer_position = %ld\n", bytecode_info.buffer_position);
-
-        int push_value  = 0;
-        int pop_value_1 = 0;
-        int pop_value_2 = 0;
+        int number_memory_cell = 0;
+        int push_value         = 0;
+        int pop_value_1        = 0;
+        int pop_value_2        = 0;
 
         switch (code_operator & ~COMMAND_ARGS_ALL)
         {
@@ -67,6 +50,7 @@ ssize_t processor(FILE *byte_code_pointer, FILE *logs_pointer)
                 printf("ERROR! Incorrect command: \"%d\" buffer_position = %ld\n", code_operator, bytecode_info.buffer_position);
                 return INVALID_OPERATOR;
         }
+
         code_operator = INVALID_OPERATOR;
     }
 
@@ -77,7 +61,7 @@ ssize_t processor(FILE *byte_code_pointer, FILE *logs_pointer)
     stack_destructor(stk);
     bytecode_parametrs_destructor(&bytecode_info);
 
-    return NO_ERROR;
+    return INVALID_OPERATOR;
 }
 
 ssize_t bytecode_parametrs_constructor(FILE *byte_code_pointer, bytecode_parametrs *bytecode_info)
@@ -85,12 +69,12 @@ ssize_t bytecode_parametrs_constructor(FILE *byte_code_pointer, bytecode_paramet
     MYASSERT(byte_code_pointer != NULL, NULL_POINTER_PASSED_TO_FUNC , return NULL_POINTER_PASSED_TO_FUNC);
     MYASSERT(bytecode_info     != NULL, NULL_POINTER_PASSED_TO_FUNC , return NULL_POINTER_PASSED_TO_FUNC);
 
-    size_t file_size = determine_size(byte_code_pointer) / sizeof(int); //TODO int->char
+    size_t file_size = determine_size(byte_code_pointer);
 
-    bytecode_info->buffer = (int *)calloc(file_size + 1, sizeof(int));
+    bytecode_info->buffer = (int *)calloc(file_size + 1, sizeof(char));
     MYASSERT(bytecode_info->buffer != NULL, FAILED_TO_ALLOCATE_DYNAM_MEMOR, return FAILED_TO_ALLOCATE_DYNAM_MEMOR);
 
-    bytecode_info->buffer_size = (ssize_t) fread(bytecode_info->buffer, sizeof(int), file_size, byte_code_pointer);
+    bytecode_info->buffer_size = (ssize_t) fread(bytecode_info->buffer, sizeof(char), file_size, byte_code_pointer);
 
     bytecode_info->buffer_position = 0;
 

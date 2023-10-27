@@ -1,12 +1,8 @@
-PUSH [1]        ;coly
-POP rbx
-DRAW
-CALL CALCULATE_SQUARES:
-HLT
+push rax        ;coly
+call CALCULATE_SQUARES:
+hlt
 
 CALCULATE_SQUARES:
-PUSH [10]
-OUT ;asas
 CALCULATE_NEW_SQUARE:
 PUSH rbx
 PUSH rbx

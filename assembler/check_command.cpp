@@ -54,7 +54,7 @@ command check_command(char *string, size_t *number_args)
 {
     #define DEF_COMMAND(command, id, command_number_args, ...)                                      \
     do {                                                                                            \
-        if (strncmp(string, #command, sizeof #command - 1) == 0) {                                  \
+        if (strncmp_case_insensitive(string, #command, sizeof #command - 1) == 0) {                 \
             if(string[sizeof #command - 1] == '\0' || isspace(string[sizeof #command - 1]))         \
             {                                                                                       \
                 *number_args = command_number_args;                                                 \
@@ -166,4 +166,28 @@ bool check_is_number(char *string_without_command, int *number, ssize_t arg_len)
         return true;
 
     return false;
+}
+
+int strncmp_case_insensitive(const char *str_1, const char *str_2, size_t number_comparisons)
+{
+    MYASSERT(str_1 != NULL, NULL_POINTER_PASSED_TO_FUNC, return -2);
+    MYASSERT(str_2 != NULL, NULL_POINTER_PASSED_TO_FUNC, return -2);
+
+    for(size_t index_comparisons = 0;index_comparisons < number_comparisons; index_comparisons++)
+    {
+        int compairing_symbol_str_1 = tolower(str_1[index_comparisons]);
+        int compairing_symbol_str_2 = tolower(str_2[index_comparisons]);
+
+        if(compairing_symbol_str_1 == compairing_symbol_str_2) {
+            continue;
+        }
+
+        if(compairing_symbol_str_1 < compairing_symbol_str_2) {
+            return -1;
+        }
+
+        return 1;
+    }
+
+    return 0;
 }

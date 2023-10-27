@@ -17,14 +17,14 @@ int main(int argc, const char *argv[])
     FILE *logs_pointer = check_isopen(file_name_logs, "w");
 
     MYASSERT(byte_code_pointer   != NULL, COULD_NOT_OPEN_THE_FILE , return COULD_NOT_OPEN_THE_FILE);
-    MYASSERT(logs_pointer != NULL, COULD_NOT_OPEN_THE_FILE , return COULD_NOT_OPEN_THE_FILE);
+    MYASSERT(logs_pointer        != NULL, COULD_NOT_OPEN_THE_FILE , return COULD_NOT_OPEN_THE_FILE);
 
     Global_color_output = false;
 
     processor(byte_code_pointer, logs_pointer);
 
     MYASSERT(check_isclose (byte_code_pointer),   COULD_NOT_CLOSE_THE_FILE, return COULD_NOT_CLOSE_THE_FILE);
-    MYASSERT(check_isclose (logs_pointer), COULD_NOT_CLOSE_THE_FILE, return COULD_NOT_CLOSE_THE_FILE);
+    MYASSERT(check_isclose (logs_pointer),        COULD_NOT_CLOSE_THE_FILE, return COULD_NOT_CLOSE_THE_FILE);
 
     return 0;
 }
