@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include "assembler.h"
 
-const size_t NUMBER_SEPARATORS = 60;
+const size_t NUMBER_SEPARATORS = 80;
 
 errors_code assembler(assem_parametrs *assem, FILE *byte_code_file_pointer, FILE *listing_file_pointer)
 {
@@ -39,8 +39,12 @@ bool check_is_empty_string(const char *string)
 {
     MYASSERT(string != NULL, NULL_POINTER_PASSED_TO_FUNC, return false);
 
-    if (!isspace(*string) && *string != '\0')
-        return false;
+    for(size_t string_index = 0; string[string_index] != '\0'; string_index++)
+    {
+        if (!isspace(string[string_index]) && string[string_index] != '\0') {
+            return false;
+        }
+    }
 
     return true;
 }

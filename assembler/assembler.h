@@ -2,7 +2,7 @@
 #define ASSEMBLER_H_INCLUDED
 
 #include "../libraries/Onegin/onegin.h"
-#include "../libraries/Onegin/myassert.h"
+#include "../libraries/Stack/myassert.h"
 #include "../enum.h"
 
 const ssize_t MAX_SIZE_LABELS =     100;
@@ -43,7 +43,7 @@ bool check_is_label(char *string, assem_parametrs *assem);
 
 errors_code assem_parametrs_destructor(assem_parametrs *assem);
 
-errors_code output_to_listing_file(const char *string, size_t number_args, FILE *listing_file_pointer, assem_parametrs *assem);
+errors_code output_to_listing_file(const char *string, size_t number_args, size_t line_number, FILE *listing_file_pointer, assem_parametrs *assem);
 errors_code putn(char symbol, size_t number_symbols, FILE *file);
 errors_code translate_var_to_binary_and_print(int number, FILE *file);
 

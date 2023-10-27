@@ -37,7 +37,7 @@ bool check_is_label(char *string, assem_parametrs *assem)
     {
         if (assem->labels_index_position >= SIZE_ARRAY_LABELS)
         {
-            printf("ERROR: Too many labels, max: %ld\n", SIZE_ARRAY_LABELS);
+            printf(RED "ERROR: Too many labels, max: %ld\n" RESET_COLOR, SIZE_ARRAY_LABELS);
             return false;
         }
 

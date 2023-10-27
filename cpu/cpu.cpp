@@ -1,17 +1,18 @@
+#include <unistd.h>
+#include <math.h>
+#include <stdio.h>
 #include "cpu.h"
 #include "../libraries/Onegin/onegin.h"
 #include "../libraries/Stack/stack.h"
-#include <math.h>
-#include <stdio.h>
 
 const int DEGREE_ACCURACY = 100;
 
-errors_code processor(FILE *byte_code_pointer, FILE *logs_pointer)
+errors_code processor(FILE *byte_code_file_pointer, FILE *logs_file_pointer)
 {
-    MYASSERT(byte_code_pointer != NULL, NULL_POINTER_PASSED_TO_FUNC , return NULL_POINTER_PASSED_TO_FUNC);
-    MYASSERT(logs_pointer      != NULL, NULL_POINTER_PASSED_TO_FUNC , return NULL_POINTER_PASSED_TO_FUNC);
+    MYASSERT(byte_code_file_pointer != NULL, NULL_POINTER_PASSED_TO_FUNC , return NULL_POINTER_PASSED_TO_FUNC);
+    MYASSERT(logs_file_pointer      != NULL, NULL_POINTER_PASSED_TO_FUNC , return NULL_POINTER_PASSED_TO_FUNC);
 
-    Global_logs_pointer = logs_pointer;
+    Global_logs_pointer = logs_file_pointer;
 
     int memory[MEMORY_SIZE]       = {};
     int regs[NUMBER_OF_REGISTERS] = {};
@@ -25,7 +26,7 @@ errors_code processor(FILE *byte_code_pointer, FILE *logs_pointer)
         .buffer_position     = 0
     };
 
-    bytecode_parametrs_constructor(byte_code_pointer, &bytecode_info);
+    bytecode_parametrs_constructor(byte_code_file_pointer, &bytecode_info);
 
     #define DEF_COMMAND(command, id, number_args, ...)  \
         case (id & ~COMMAND_ARGS_ALL):                  \
@@ -46,7 +47,7 @@ errors_code processor(FILE *byte_code_pointer, FILE *logs_pointer)
             #include "../commands.h"
 
             default:
-                printf("ERROR! Incorrect command: \"%d\" buffer_position = %lu\n", code_operator, bytecode_info.buffer_position);
+                printf(RED "ERROR! Incorrect command: \"%d\" buffer_position = %lu\n" RESET_COLOR, code_operator, bytecode_info.buffer_position);
                 return INVALID_OPERATOR;
         }
 
@@ -55,7 +56,7 @@ errors_code processor(FILE *byte_code_pointer, FILE *logs_pointer)
 
     #undef DEF_COMMAND
 
-    printf("ERROR: Not HLT\n");
+    printf(RED "ERROR: Not HLT\n" RESET_COLOR);
 
     stack_destructor(stk);
     bytecode_parametrs_destructor(&bytecode_info);
@@ -63,17 +64,17 @@ errors_code processor(FILE *byte_code_pointer, FILE *logs_pointer)
     return INVALID_OPERATOR;
 }
 
-errors_code bytecode_parametrs_constructor(FILE *byte_code_pointer, bytecode_parametrs *bytecode_info)
+errors_code bytecode_parametrs_constructor(FILE *byte_code_file_pointer, bytecode_parametrs *bytecode_info)
 {
-    MYASSERT(byte_code_pointer != NULL, NULL_POINTER_PASSED_TO_FUNC , return NULL_POINTER_PASSED_TO_FUNC);
-    MYASSERT(bytecode_info     != NULL, NULL_POINTER_PASSED_TO_FUNC , return NULL_POINTER_PASSED_TO_FUNC);
+    MYASSERT(byte_code_file_pointer != NULL, NULL_POINTER_PASSED_TO_FUNC , return NULL_POINTER_PASSED_TO_FUNC);
+    MYASSERT(bytecode_info          != NULL, NULL_POINTER_PASSED_TO_FUNC , return NULL_POINTER_PASSED_TO_FUNC);
 
-    size_t file_size = determine_size(byte_code_pointer);
+    size_t file_size = determine_size(byte_code_file_pointer);
 
     bytecode_info->buffer = (int *)calloc(file_size + 1, sizeof(char));
     MYASSERT(bytecode_info->buffer != NULL, FAILED_TO_ALLOCATE_DYNAM_MEMOR, return FAILED_TO_ALLOCATE_DYNAM_MEMOR);
 
-    bytecode_info->buffer_size = fread(bytecode_info->buffer, sizeof(char), file_size, byte_code_pointer) / sizeof(int);
+    bytecode_info->buffer_size = fread(bytecode_info->buffer, sizeof(char), file_size, byte_code_file_pointer) / sizeof(int);
 
     bytecode_info->buffer_position = 0;
 
@@ -101,7 +102,7 @@ int pop_from_bytecode_buffer(bytecode_parametrs *bytecode_info)
 
     if (bytecode_info->buffer_position >= bytecode_info->buffer_size)
     {
-        printf("ERROR! Pop from an emptystack\n");
+        printf(RED "ERROR! Pop from an emptystack\n" RESET_COLOR);
         return 0;
     }
 

@@ -44,7 +44,7 @@ errors_code disassembler(FILE *byte_code_file_pointer, FILE *source_code_file_po
             #include "../commands.h"
 
             default:
-                printf("ERROR! Incorrect command: \"%d\" buffer_position = %lu\n", code_operator, bytecode_info.buffer_position);
+                printf(RED "ERROR! Incorrect command: \"%d\" buffer_position = %lu\n" RESET_COLOR, code_operator, bytecode_info.buffer_position);
                 return INVALID_OPERATOR;
         }
 
@@ -96,7 +96,7 @@ int pop_from_bytecode_buffer(bytecode_parametrs *bytecode_info)
 
     if (bytecode_info->buffer_position >= bytecode_info->buffer_size)
     {
-        printf("ERROR! Pop from an emptystack\n");
+        printf(RED "ERROR! Pop from an emptystack\n" RESET_COLOR);
         return 0;
     }
 
@@ -122,7 +122,7 @@ errors_code define_and_print_arg(FILE *source_code_file_pointer, int code_operat
             }
 
             else {
-                printf("ERROR: INCORRECT NUMBER REG\n");
+                printf(RED "ERROR: INCORRECT NUMBER REG\n" RESET_COLOR);
                 return INVALID_OPERATOR;
             }
 
@@ -138,7 +138,7 @@ errors_code define_and_print_arg(FILE *source_code_file_pointer, int code_operat
             }
 
             else {
-                printf("ERROR: INCORRECT NUMBER MEMORY CELL\n");
+                printf(RED "ERROR: INCORRECT NUMBER MEMORY CELL\n" RESET_COLOR);
                 return INVALID_OPERATOR;
             }
 
@@ -154,7 +154,7 @@ errors_code define_and_print_arg(FILE *source_code_file_pointer, int code_operat
             }
 
             else {
-                printf("ERROR: INCORRECT NUMBER REG\n");
+                printf(RED "ERROR: INCORRECT NUMBER REG\n" RESET_COLOR);
                 return INVALID_OPERATOR;
             }
 
@@ -170,7 +170,7 @@ errors_code define_and_print_arg(FILE *source_code_file_pointer, int code_operat
 
         default:
         {
-            printf("ERROR: INCORRECT NUMBER ARGS\n");
+            printf(RED "ERROR: INCORRECT NUMBER ARGS\n" RESET_COLOR);
             return INVALID_OPERATOR;
         }
     }

@@ -22,7 +22,7 @@ int main(int argc, const char *argv[])
 
     FILE *source_code_file_pointer = check_isopen_old(file_name_input,   "r");
     FILE *byte_code_file_pointer   = check_isopen_old(file_name_output,  "wb"); //TODO BIN
-    FILE *listing_file_pointer     = check_isopen_old(file_name_listing, "w");
+    FILE *listing_file_pointer     = check_isopen    (file_name_listing, "w");
 
     MYASSERT(source_code_file_pointer != NULL, COULD_NOT_OPEN_THE_FILE , return COULD_NOT_OPEN_THE_FILE);
     MYASSERT(byte_code_file_pointer   != NULL, COULD_NOT_OPEN_THE_FILE , return COULD_NOT_OPEN_THE_FILE);

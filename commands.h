@@ -1,13 +1,13 @@
 //WARNING HLT 31st command!!!
 
-#define POP_WITH_CHECK(stk, pop_value)              \
- do {                                               \
-    if(pop(stk, pop_value) != NO_ERROR)             \
-    {                                               \
-        printf("ERROR! Pop from an emptystack\n");  \
-        return INVALID_OPERATOR;                    \
-    }                                               \
-                                                    \
+#define POP_WITH_CHECK(stk, pop_value)                              \
+ do {                                                               \
+    if(pop(stk, pop_value) != NO_ERROR)                             \
+    {                                                               \
+        printf(RED "ERROR! Pop from an emptystack\n" RESET_COLOR);  \
+        return INVALID_OPERATOR;                                    \
+    }                                                               \
+                                                                    \
 }  while(0)
 
 DEF_COMMAND(HLT,  -1, 0,
@@ -24,6 +24,8 @@ DEF_COMMAND(PUSH,  2, 1,
     {
         case(COMMAND_ARGS_MEMORY_REGISTER):
         {
+            sleep(1);
+
             int reg = pop_from_bytecode_buffer(&bytecode_info);
 
             if (1 <= reg && reg <= NUMBER_OF_REGISTERS)
@@ -33,13 +35,13 @@ DEF_COMMAND(PUSH,  2, 1,
                 }
 
                 else {
-                    printf("ERROR: INCORRECT NUMBER MEMORY CELL IN PUSH\n");
+                    printf(RED "ERROR: INCORRECT NUMBER MEMORY CELL IN PUSH\n" RESET_COLOR);
                     return INVALID_OPERATOR;
                 }
             }
 
             else {
-                printf("ERROR: INCORRECT NUMBER REG IN PUSH\n");
+                printf(RED "ERROR: INCORRECT NUMBER REG IN PUSH\n" RESET_COLOR);
                 return INVALID_OPERATOR;
             }
 
@@ -48,6 +50,8 @@ DEF_COMMAND(PUSH,  2, 1,
 
         case(COMMAND_ARGS_MEMORY_NUMBER):
         {
+            sleep(1);
+
             number_memory_cell = pop_from_bytecode_buffer(&bytecode_info);
 
             if(number_memory_cell < MEMORY_SIZE && number_memory_cell > 0) {
@@ -55,7 +59,7 @@ DEF_COMMAND(PUSH,  2, 1,
             }
 
             else {
-                printf("ERROR: INCORRECT NUMBER MEMORY CELL IN PUSH\n");
+                printf(RED "ERROR: INCORRECT NUMBER MEMORY CELL IN PUSH\n" RESET_COLOR);
                 return INVALID_OPERATOR;
             }
 
@@ -71,7 +75,7 @@ DEF_COMMAND(PUSH,  2, 1,
             }
 
             else {
-                printf("ERROR: INCORRECT NUMBER REG IN PUSH\n");
+                printf(RED "ERROR: INCORRECT NUMBER REG IN PUSH\n" RESET_COLOR);
                 return INVALID_OPERATOR;
             }
 
@@ -87,7 +91,7 @@ DEF_COMMAND(PUSH,  2, 1,
 
         default:
         {
-            printf("ERROR: INCORRECT NUMBER ARGS OF PUSH\n");
+            printf(RED "ERROR: INCORRECT NUMBER ARGS OF PUSH\n" RESET_COLOR);
             return INVALID_OPERATOR;
         }
     }
@@ -109,7 +113,7 @@ DEF_COMMAND(DIV,   4, 0,
 
     if (!pop_value_2)
     {
-        printf("ERROR! ATTEMPT TO DIV BY 0\n");
+        printf(RED "ERROR! ATTEMPT TO DIV BY 0\n" RESET_COLOR);
         return INVALID_OPERATOR;
     }
 
@@ -185,7 +189,7 @@ DEF_COMMAND(POP,  13, 1,
             }
 
             else {
-                printf("ERROR: INCORRECT NUMBER REG IN POP\n");
+                printf(RED "ERROR: INCORRECT NUMBER REG IN POP\n" RESET_COLOR);
                 return INVALID_OPERATOR;
             }
 
@@ -194,6 +198,8 @@ DEF_COMMAND(POP,  13, 1,
 
         case(COMMAND_ARGS_MEMORY_REGISTER):
         {
+            sleep(1);
+
             int reg = pop_from_bytecode_buffer(&bytecode_info);
 
             if (1 <= reg && reg <= NUMBER_OF_REGISTERS)
@@ -203,13 +209,13 @@ DEF_COMMAND(POP,  13, 1,
                 }
 
                 else {
-                    printf("ERROR: INCORRECT NUMBER MEMORY CELL IN POP\n");
+                    printf(RED "ERROR: INCORRECT NUMBER MEMORY CELL IN POP\n" RESET_COLOR);
                     return INVALID_OPERATOR;
                 }
             }
 
             else {
-                printf("ERROR: INCORRECT NUMBER REG IN POP\n");
+                printf(RED "ERROR: INCORRECT NUMBER REG IN POP\n" RESET_COLOR);
                 return INVALID_OPERATOR;
             }
 
@@ -218,6 +224,8 @@ DEF_COMMAND(POP,  13, 1,
 
         case(COMMAND_ARGS_MEMORY_NUMBER):
         {
+            sleep(1);
+
             number_memory_cell = pop_from_bytecode_buffer(&bytecode_info);
 
             if(number_memory_cell < MEMORY_SIZE && number_memory_cell > 0) {
@@ -225,7 +233,7 @@ DEF_COMMAND(POP,  13, 1,
             }
 
             else {
-                printf("ERROR: INCORRECT NUMBER REG IN POP\n");
+                printf(RED "ERROR: INCORRECT NUMBER REG IN POP\n" RESET_COLOR);
                 return INVALID_OPERATOR;
             }
 
@@ -234,7 +242,7 @@ DEF_COMMAND(POP,  13, 1,
 
         default:
         {
-            printf("ERROR: INCORRECT NUMBER ARGS OF POP\n");
+            printf(RED "ERROR: INCORRECT NUMBER ARGS OF POP\n" RESET_COLOR);
             return INVALID_OPERATOR;
         }
     }

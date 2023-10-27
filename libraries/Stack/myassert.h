@@ -28,6 +28,7 @@
 
 /// Список возможных ошибок, которые печатает MYASSERT
 enum errors_code {
+    ASSERT_NO_ERROR                 =  0,
     NON_FINITE_NUM_PASSED_TO_FUNC   =  1,///< Указывает, что в функцию было передано не конечное число
     NULL_POINTER_PASSED_TO_FUNC     =  2,///< Указывает, что в функцию был передан 0 указатель
     EQUAL_POINTERS_PASSED_TO_FUNC   =  3,///< Указывает, что в функцию были переданы равные указатели
@@ -37,7 +38,7 @@ enum errors_code {
     COULD_NOT_OPEN_THE_FILE         =  7,
     COULD_NOT_CLOSE_THE_FILE        =  8,
     HASH_HAS_BEEN_CHANGED           =  9,
-    INVALID_COMMAND                 =  10
+    INVALID_OPERATOR                = 10
 };
 
 

@@ -22,13 +22,13 @@ errors_code put_command_in_buffer(char *string, assem_parametrs *assem, size_t l
 
         if (!check_command_args(string_without_command, number_args, &command_id, &number, &reg, assem, arg_len))
         {
-            printf("%lu: ERROR COMMAND: %s\n", line_number, string);
+            printf(RED "%lu: ERROR COMMAND: %s\n" RESET_COLOR, line_number, string);
             return INVALID_OPERATOR;
         }
 
         if (string_without_command && parsing_string_to_tokens(string_without_command, NULL, " \r\n\t"))
         {
-            printf("%lu: ERROR COMMAND: %s\n", line_number, string);
+            printf(RED "%lu: ERROR COMMAND: %s\n" RESET_COLOR, line_number, string);
             return INVALID_OPERATOR;
         }
 
@@ -40,12 +40,12 @@ errors_code put_command_in_buffer(char *string, assem_parametrs *assem, size_t l
         if (number_args > 0 && command_id & COMMAND_ARGS_NUMBER)
             push_in_bytecode_buffer(assem, number);
 
-        output_to_listing_file(string, number_args, listing_file_pointer, assem);
+        output_to_listing_file(string, number_args, line_number, listing_file_pointer, assem);
 
         return ASSERT_NO_ERROR;
     }
 
-    printf("%lu: ERROR COMMAND: %s\n", line_number, string);
+    printf(RED "%lu: ERROR COMMAND: %s\n" RESET_COLOR, line_number, string);
 
     return INVALID_OPERATOR;
 }
