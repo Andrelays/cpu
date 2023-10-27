@@ -4,7 +4,7 @@
  do {                                               \
     if(pop(stk, pop_value) != NO_ERROR)             \
     {                                               \
-        printf("ERROR! Pop from an emptystack");    \
+        printf("ERROR! Pop from an emptystack\n");  \
         return INVALID_OPERATOR;                    \
     }                                               \
                                                     \
@@ -109,7 +109,7 @@ DEF_COMMAND(DIV,   4, 0,
 
     if (!pop_value_2)
     {
-        printf("ERROR! ATTEMPT TO DIV BY 0");
+        printf("ERROR! ATTEMPT TO DIV BY 0\n");
         return INVALID_OPERATOR;
     }
 
@@ -242,22 +242,22 @@ DEF_COMMAND(POP,  13, 1,
 
 DEF_COMMAND(JMP,  14, 1,
 {
-    bytecode_info.buffer_position = bytecode_info.buffer[bytecode_info.buffer_position];
+    bytecode_info.buffer_position = (size_t) bytecode_info.buffer[bytecode_info.buffer_position];
 })
 
-#define JUMP_WITH_CONDITION(name, id, sign)                                                         \
-DEF_COMMAND(name, id, 1,                                                                            \
-{                                                                                                   \
-    POP_WITH_CHECK(stk, &pop_value_2);                                                              \
-    POP_WITH_CHECK(stk, &pop_value_1);                                                              \
-                                                                                                    \
-    if (pop_value_1 sign pop_value_2) {                                                             \
-        bytecode_info.buffer_position = bytecode_info.buffer[bytecode_info.buffer_position];        \
-    }                                                                                               \
-                                                                                                    \
-    else {                                                                                          \
-        ++bytecode_info.buffer_position;                                                            \
-    }                                                                                               \
+#define JUMP_WITH_CONDITION(name, id, sign)                                                             \
+DEF_COMMAND(name, id, 1,                                                                                \
+{                                                                                                       \
+    POP_WITH_CHECK(stk, &pop_value_2);                                                                  \
+    POP_WITH_CHECK(stk, &pop_value_1);                                                                  \
+                                                                                                        \
+    if (pop_value_1 sign pop_value_2) {                                                                 \
+        bytecode_info.buffer_position = (size_t) bytecode_info.buffer[bytecode_info.buffer_position];   \
+    }                                                                                                   \
+                                                                                                        \
+    else {                                                                                              \
+        ++bytecode_info.buffer_position;                                                                \
+    }                                                                                                   \
 })
 
 JUMP_WITH_CONDITION(JA,  15, >)
@@ -272,13 +272,13 @@ JUMP_WITH_CONDITION(JNE, 20, !=)
 DEF_COMMAND(CALL,  21, 1,
 {
     push(stk, (int) bytecode_info.buffer_position + 1);
-    bytecode_info.buffer_position = bytecode_info.buffer[bytecode_info.buffer_position];
+    bytecode_info.buffer_position = (size_t) bytecode_info.buffer[bytecode_info.buffer_position];
 })
 
 DEF_COMMAND(RETURN, 22, 0,
 {
     POP_WITH_CHECK(stk, &pop_value_1);
-    bytecode_info.buffer_position = pop_value_1;
+    bytecode_info.buffer_position = (size_t) pop_value_1;
 })
 
 DEF_COMMAND(DRAW, 23, 0,

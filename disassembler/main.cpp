@@ -5,29 +5,22 @@
 
 int main(int argc, const char *argv[])
 {
-    const int correct_number_argc = 3;
+    const int CORRECT_NUMBER_ARGC = 3;
 
-    if(!check_argc(argc, correct_number_argc))
+    if(!check_argc(argc, CORRECT_NUMBER_ARGC))
         return -1;
 
-    struct text_parametrs source_code = {
-        .string_array = NULL,
-        .buffer       = NULL,
-        .number_lines = 0
-    };
+    const char *file_name_input     = argv[1];
+    const char *file_name_output    = argv[2];
 
-    const char *file_name_input  = argv[1];
-    const char *file_name_output = argv[2];
+    FILE *byte_code_file_pointer   = check_isopen_old(file_name_input,  "rb"); //TODO BIN
+    FILE *source_code_file_pointer = check_isopen_old(file_name_output, "w");
 
-    Global_input_pointer  = check_isopen_old(file_name_input,  "r");
-    Global_output_pointer = check_isopen_old(file_name_output, "w");
+    MYASSERT(byte_code_file_pointer   != NULL, COULD_NOT_OPEN_THE_FILE , return COULD_NOT_OPEN_THE_FILE);
+    MYASSERT(source_code_file_pointer != NULL, COULD_NOT_OPEN_THE_FILE , return COULD_NOT_OPEN_THE_FILE);
 
-    constructor(&source_code, Global_input_pointer);
+    disassembler(byte_code_file_pointer, source_code_file_pointer);
 
-    disassembler(&source_code);
-
-    destructor(&source_code);
-
-    check_isclose(Global_input_pointer);
-    check_isclose(Global_output_pointer);
+    MYASSERT(check_isclose (byte_code_file_pointer),    COULD_NOT_CLOSE_THE_FILE, return COULD_NOT_CLOSE_THE_FILE);
+    MYASSERT(check_isclose (source_code_file_pointer),  COULD_NOT_CLOSE_THE_FILE, return COULD_NOT_CLOSE_THE_FILE);
 }

@@ -5,96 +5,175 @@
 #include <math.h>
 #include <string.h>
 
-FILE *Global_input_pointer  = NULL;
-FILE *Global_output_pointer = NULL;
-
-// #define COMMAND_LIST\
-//     DO(HLT)\
-//     DO(PUSH)\
-//     DO(SUB)\
-//     DO(DIV)\
-//     DO(IN)\
-//     DO(OUT)\
-//     DO(MUL)\
-//     DO(ADD)\
-//     DO(SQRT)\
-//     DO(SIN)\
-//     DO(COS)\
-//     DO(POP)
-//
-// #define DO(COMMAND)\
-//     printf("%s\n", COMMAND.name);
-//     COMMAND_LIST
-// #undef
-
-
-ssize_t disassembler(struct text_parametrs *byte_code)
+errors_code disassembler(FILE *byte_code_file_pointer, FILE *source_code_file_pointer)
 {
-    MYASSERT(Global_input_pointer  != NULL, NULL_POINTER_PASSED_TO_FUNC , return NULL_POINTER_PASSED_TO_FUNC);
-    MYASSERT(Global_output_pointer != NULL, NULL_POINTER_PASSED_TO_FUNC , return NULL_POINTER_PASSED_TO_FUNC);
+    MYASSERT(byte_code_file_pointer   != NULL, NULL_POINTER_PASSED_TO_FUNC, return NULL_POINTER_PASSED_TO_FUNC);
+    MYASSERT(source_code_file_pointer != NULL, NULL_POINTER_PASSED_TO_FUNC, return NULL_POINTER_PASSED_TO_FUNC);
 
-    int code_operator = NO_OPERATOR;
+    struct bytecode_parametrs bytecode_info = {
+        .buffer              = NULL,
+        .buffer_size         = 0,
+        .buffer_position     = 0
+    };
 
-    char *buffer = strtok(byte_code->buffer, " \n\t\r");
+    bytecode_parametrs_constructor(byte_code_file_pointer, &bytecode_info);
 
-    while(buffer != NULL && sscanf(buffer, "%d", &code_operator))
+    #define DEF_COMMAND(command, id, number_args, ...)                                      \
+        case (id & ~COMMAND_ARGS_ALL):                                                      \
+        {                                                                                   \
+            fprintf(source_code_file_pointer, "%s ", #command);                             \
+                                                                                            \
+            if (number_args == 1)                                                           \
+            {                                                                               \
+                int arg = pop_from_bytecode_buffer(&bytecode_info);                         \
+                                                                                            \
+                define_and_print_arg(source_code_file_pointer, code_operator, arg);         \
+            }                                                                               \
+                                                                                            \
+            fprintf(source_code_file_pointer, "\n");                                        \
+                                                                                            \
+            break;                                                                          \
+        }
+
+    while(bytecode_info.buffer_position < bytecode_info.buffer_size)
     {
-        switch (code_operator)
+        int code_operator = pop_from_bytecode_buffer(&bytecode_info);
+
+        switch (code_operator & ~COMMAND_ARGS_ALL)
         {
-
-            #define CHECK_OPERATOR_(command)                                                         \
-                case command:                                                                        \
-                    fprintf(Global_output_pointer, "%s ", #command);                                 \
-                    break;
-
-            CHECK_OPERATOR_(HLT);
-            CHECK_OPERATOR_(PUSH);
-            CHECK_OPERATOR_(SUB);
-            CHECK_OPERATOR_(DIV);
-            CHECK_OPERATOR_(IN);
-            CHECK_OPERATOR_(OUT);
-            CHECK_OPERATOR_(MUL);
-            CHECK_OPERATOR_(ADD);
-            CHECK_OPERATOR_(SQRT);
-            CHECK_OPERATOR_(SIN);
-            CHECK_OPERATOR_(COS);
-            CHECK_OPERATOR_(POP);
-
-            #undef CHECK_OPERATOR_
+            #include "../commands.h"
 
             default:
-                printf("ERROR! Incorrect command: \"%d\"\n", code_operator);
-                return INVALID_COMMAND;
+                printf("ERROR! Incorrect command: \"%d\" buffer_position = %lu\n", code_operator, bytecode_info.buffer_position);
+                return INVALID_OPERATOR;
         }
 
-        printf("%s ", buffer);
-
-        buffer = strtok(NULL, " \n\t\r");
-
-        if (buffer != NULL && code_operator == PUSH)
-        {
-            fprintf(Global_output_pointer, "%s", buffer);
-            buffer = strtok(NULL, " \n\t\r");
-        }
-
-        fputc('\n', Global_output_pointer);
-
-        code_operator = NO_OPERATOR;
+        code_operator = INVALID_OPERATOR;
     }
 
-    return NO_ERROR;
+    #undef DEF_COMMAND
+
+    bytecode_parametrs_destructor(&bytecode_info);
+
+    return ASSERT_NO_ERROR;
 }
 
-// int *save_data_to_array(FILE *file_pointer)
-// {
-//     size_t size_file = determine_size(file_pointer);
-//
-//     int *buffer = (int *)calloc(size_file + 1, sizeof(int));
-//     MYASSERT(buffer != NULL, NULL_POINTER_PASSED_TO_FUNC, return NULL);
-//
-//     size_file = fread(buffer, sizeof(int), size_file, file_pointer);
-//
-//     buffer[size_file] = '\0';
-//
-//     return buffer;
-// }
+errors_code bytecode_parametrs_constructor(FILE *byte_code_pointer, bytecode_parametrs *bytecode_info)
+{
+    MYASSERT(byte_code_pointer != NULL, NULL_POINTER_PASSED_TO_FUNC , return NULL_POINTER_PASSED_TO_FUNC);
+    MYASSERT(bytecode_info     != NULL, NULL_POINTER_PASSED_TO_FUNC , return NULL_POINTER_PASSED_TO_FUNC);
+
+    size_t file_size = determine_size(byte_code_pointer);
+
+    bytecode_info->buffer = (int *)calloc(file_size + 1, sizeof(char));
+    MYASSERT(bytecode_info->buffer != NULL, FAILED_TO_ALLOCATE_DYNAM_MEMOR, return FAILED_TO_ALLOCATE_DYNAM_MEMOR);
+
+    bytecode_info->buffer_size = fread(bytecode_info->buffer, sizeof(char), file_size, byte_code_pointer) / sizeof(int);
+
+    bytecode_info->buffer_position = 0;
+
+    return ASSERT_NO_ERROR;
+}
+
+errors_code bytecode_parametrs_destructor(bytecode_parametrs *bytecode_info)
+{
+    MYASSERT(bytecode_info         != NULL, NULL_POINTER_PASSED_TO_FUNC , return NULL_POINTER_PASSED_TO_FUNC);
+    MYASSERT(bytecode_info->buffer != NULL, NULL_POINTER_PASSED_TO_FUNC , return NULL_POINTER_PASSED_TO_FUNC);
+
+    free(bytecode_info->buffer);
+    bytecode_info->buffer = NULL;
+
+    bytecode_info->buffer_position = 0;
+    bytecode_info->buffer_size = 0;
+
+    return ASSERT_NO_ERROR;
+}
+
+int pop_from_bytecode_buffer(bytecode_parametrs *bytecode_info)
+{
+    MYASSERT(bytecode_info         != NULL, NULL_POINTER_PASSED_TO_FUNC, return 0);
+    MYASSERT(bytecode_info->buffer != NULL, NULL_POINTER_PASSED_TO_FUNC, return 0);
+
+    if (bytecode_info->buffer_position >= bytecode_info->buffer_size)
+    {
+        printf("ERROR! Pop from an emptystack\n");
+        return 0;
+    }
+
+    int pop_value = bytecode_info->buffer[bytecode_info->buffer_position];
+
+    ++bytecode_info->buffer_position;
+
+    return pop_value;
+}
+
+errors_code define_and_print_arg(FILE *source_code_file_pointer, int code_operator, int arg)
+{
+    MYASSERT(source_code_file_pointer != NULL, NULL_POINTER_PASSED_TO_FUNC , return NULL_POINTER_PASSED_TO_FUNC);
+
+    switch(code_operator & COMMAND_ARGS_ALL)
+    {
+        case(COMMAND_ARGS_MEMORY_REGISTER):
+        {
+            int reg = arg;
+
+            if (1 <= reg && reg <= NUMBER_OF_REGISTERS) {
+                fprintf(source_code_file_pointer, "[r%cx]", reg + 'a' - 1);
+            }
+
+            else {
+                printf("ERROR: INCORRECT NUMBER REG\n");
+                return INVALID_OPERATOR;
+            }
+
+            break;
+        }
+
+        case(COMMAND_ARGS_MEMORY_NUMBER):
+        {
+            int number_memory_cell = arg;
+
+            if(number_memory_cell > 0) {
+                fprintf(source_code_file_pointer, "[%d]", number_memory_cell);
+            }
+
+            else {
+                printf("ERROR: INCORRECT NUMBER MEMORY CELL\n");
+                return INVALID_OPERATOR;
+            }
+
+            break;
+        }
+
+        case(COMMAND_ARGS_REGISTER):
+        {
+            int reg = arg;
+
+            if (1 <= reg && reg <= NUMBER_OF_REGISTERS) {
+                fprintf(source_code_file_pointer, "r%cx", reg + 'a' - 1);
+            }
+
+            else {
+                printf("ERROR: INCORRECT NUMBER REG\n");
+                return INVALID_OPERATOR;
+            }
+
+            break;
+        }
+
+        case(COMMAND_ARGS_NUMBER):
+        {
+            fprintf(source_code_file_pointer, "%d", arg);
+
+            break;
+        }
+
+        default:
+        {
+            printf("ERROR: INCORRECT NUMBER ARGS\n");
+            return INVALID_OPERATOR;
+        }
+    }
+
+    return ASSERT_NO_ERROR;
+}
