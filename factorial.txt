@@ -1,0 +1,28 @@
+main:
+    in
+    pop rax
+    push 1
+    pop rbx
+
+    call calculate_factorial:
+    push rbx
+    out
+hlt
+
+calculate_factorial:
+    push rax
+    push 1
+    jb end_calculate_factorial:
+
+    push rbx
+    push rax
+    mul
+    pop rbx
+    push rax
+    push 1
+    sub
+    pop rax
+    call calculate_factorial:
+
+    end_calculate_factorial:
+return

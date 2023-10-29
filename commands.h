@@ -330,10 +330,28 @@ DEF_COMMAND(DRAWF, 24, 0,
         }
     }
 
+    static SDL_Event e;
+    while(SDL_PollEvent(&e)) {
+        if(e.type == SDL_QUIT)
+        {
+            stack_destructor(stk);
+            bytecode_parametrs_destructor(&bytecode_info);
+
+            free(memory);
+
+            SDL_DestroyRenderer(renderer);
+            SDL_DestroyWindow(window);
+            SDL_Quit();
+            exit(0);
+            return ASSERT_NO_ERROR;
+        }
+    }
+
+
     SDL_RenderPresent(renderer);
 
     SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0);
-    usleep(82e3);
+    usleep(30e3);
 
     SDL_RenderClear(renderer);
 })

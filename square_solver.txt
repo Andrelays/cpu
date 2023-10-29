@@ -1,0 +1,189 @@
+main:
+    call entering_coefficiens:
+    call check_roots:
+    call output_roots:
+hlt
+
+
+entering_coefficiens:
+    in
+    in
+    in
+    pop rcx
+    pop rbx
+    pop rax
+return
+
+
+check_roots:
+    push rax
+    push 0
+    je a_coeff_is_zero:
+
+    call solve_square:
+    jmp end_check_roots:
+
+    a_coeff_is_zero:
+    push rbx
+    push 0
+    je b_coeff_is_zero:
+
+    call solve_linear:
+    push 1
+    pop  rdx
+    jmp end_check_roots:
+
+    b_coeff_is_zero:
+    push rcx
+    push 0
+    je c_coeff_is_zero:
+
+    push 0
+    pop  rdx
+    jmp end_check_roots:
+
+    c_coeff_is_zero:
+    push 3
+    pop  rdx
+
+    end_check_roots:
+return
+
+
+solve_square:
+    call calculate_discriminant:
+    push [0]
+    push 0
+    jb discriminant_is_negative:
+
+    push [0]
+    push 0
+    je discriminant_is_null:
+
+    push 2
+    pop rdx
+    push -1
+    push rbx
+    mul
+    push [0]
+    sqrt
+    add
+    push rax
+    push 2
+    mul
+    div
+    pop [1]
+
+    push -1
+    push rbx
+    mul
+    push [0]
+    sqrt
+    sub
+    push rax
+    push 2
+    mul
+    div
+    pop [0]
+    jmp end_solve_square:
+
+    discriminant_is_null:
+    push 1
+    pop rdx
+    push -1
+    push rbx
+    mul
+    push rax
+    push 2
+    mul
+    div
+    pop [0]
+    jmp end_solve_square:
+
+    discriminant_is_negative:
+    push 0
+    pop rdx
+
+    end_solve_square:
+return
+
+solve_linear:
+    push 0
+    push rcx
+    sub
+    push rbx
+    div
+    pop [0]
+return
+
+calculate_discriminant:
+    push rbx
+    push rbx
+    mul
+    push rax
+    push rcx
+    push -4
+    mul
+    mul
+    add
+    pop [0]
+return
+
+output_roots:
+    push 0
+    push rdx
+    je no_roots:
+
+    push 3
+    push rdx
+    je inf_roots:
+
+    push 1
+    push rdx
+    je one_root:
+
+    push 2
+    push rdx
+    je two_roots:
+
+    one_root:
+    push [0]
+    out
+    jmp end_output_roots:
+
+    two_roots:
+    push [0]
+    push [1]
+    out
+    out
+    jmp end_output_roots:
+
+    no_roots:
+    call print_no:
+    jmp end_output_roots:
+
+    inf_roots:
+    call print_inf:
+
+    end_output_roots:
+return
+
+print_no:
+    push 78                     ;'N'
+    outc
+    push 79                     ;'O'
+    outc
+    push 10                     ;'\n'
+    outc
+return
+
+print_inf:
+    push 73                     ;'I'
+    outc
+    push 78                     ;'N'
+    outc
+    push 70                     ;'F'
+    outc
+    push 10                     ;'\n'
+    outc
+return
