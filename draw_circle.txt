@@ -1,0 +1,61 @@
+INIT_DRAW
+
+main:
+    new_line:
+    call count_the_point:
+    push 1
+    push rax
+    add
+    pop  rax
+    push rax
+    push 30
+    jb new_line:
+
+    drawf
+hlt
+
+count_the_point:
+    push rbx
+    push 50
+    sub
+    push rbx
+    push 50
+    sub
+    mul
+    push rax
+    push 15
+    sub
+    push rax
+    push 15
+    sub
+    mul
+    add
+    push 15
+    push 15
+    mul
+    jb put_point:
+    push 0
+    jmp point:
+    put_point:
+    push 1
+    point:
+    push rax
+    push 100
+    mul
+    push rbx
+    add
+    pop rcx
+    pop [rcx]
+
+    push 1
+    push rbx
+    add
+    pop  rbx
+    push rbx
+    push 100
+    jb count_the_point:
+
+    push 0
+    pop rbx
+
+return

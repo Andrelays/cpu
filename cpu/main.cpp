@@ -19,7 +19,7 @@ int main(int argc, const char *argv[])
     MYASSERT(byte_code_file_pointer != NULL, COULD_NOT_OPEN_THE_FILE , return COULD_NOT_OPEN_THE_FILE);
     MYASSERT(logs_file_pointer      != NULL, COULD_NOT_OPEN_THE_FILE , return COULD_NOT_OPEN_THE_FILE);
 
-    Global_color_output = true;
+    Global_color_output = false;
 
     processor(byte_code_file_pointer, logs_file_pointer);
 
@@ -28,3 +28,4 @@ int main(int argc, const char *argv[])
 
     return 0;
 }
+

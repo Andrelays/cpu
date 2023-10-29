@@ -21,7 +21,10 @@ errors_code assembler(assem_parametrs *assem, FILE *byte_code_file_pointer, FILE
     {
         char *string = ((source_code->string_array)[position]).string_pointer;
 
-        if (check_is_empty_string(string) || check_is_label(string, assem))
+        if (!(string = check_is_empty_string(string)))
+            continue;
+
+        if (check_is_label(string, assem))
             continue;
 
         if (put_command_in_buffer(string, assem, position  + 1, listing_file_pointer) == INVALID_OPERATOR)
@@ -35,16 +38,16 @@ errors_code assembler(assem_parametrs *assem, FILE *byte_code_file_pointer, FILE
     return ASSERT_NO_ERROR;
 }
 
-bool check_is_empty_string(const char *string)
+char *check_is_empty_string(char *string)
 {
-    MYASSERT(string != NULL, NULL_POINTER_PASSED_TO_FUNC, return false);
+    MYASSERT(string != NULL, NULL_POINTER_PASSED_TO_FUNC, return NULL);
 
     for(size_t string_index = 0; string[string_index] != '\0'; string_index++)
     {
         if (!isspace(string[string_index]) && string[string_index] != '\0') {
-            return false;
+            return (string + string_index);
         }
     }
 
-    return true;
+    return NULL;
 }

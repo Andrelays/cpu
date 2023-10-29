@@ -47,7 +47,7 @@ errors_code output_to_listing_file(const char *string, size_t number_args, size_
 errors_code putn(char symbol, size_t number_symbols, FILE *file);
 errors_code translate_var_to_binary_and_print(int number, FILE *file);
 
-bool check_is_empty_string(const char *string);
+char *check_is_empty_string(char *string);
 
 char *parsing_string_to_tokens(char *string, ssize_t *token_length, const char *separator);
 ssize_t find_token_size(char *token, const char *separator);

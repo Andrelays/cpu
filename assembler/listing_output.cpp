@@ -5,7 +5,7 @@
 #include "../libraries/Stack/colors.h"
 
 FILE *Global_logs_pointer  = stderr;
-bool  Global_color_output  = true;
+bool  Global_color_output  = false;
 
 
 errors_code output_to_listing_file(const char *string, size_t number_args, size_t line_number, FILE *listing_file_pointer, assem_parametrs *assem)

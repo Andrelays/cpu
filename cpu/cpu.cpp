@@ -4,17 +4,19 @@
 #include "cpu.h"
 #include "../libraries/Onegin/onegin.h"
 #include "../libraries/Stack/stack.h"
-
-const int DEGREE_ACCURACY = 100;
+#include <SDL2/SDL.h>
 
 errors_code processor(FILE *byte_code_file_pointer, FILE *logs_file_pointer)
 {
     MYASSERT(byte_code_file_pointer != NULL, NULL_POINTER_PASSED_TO_FUNC , return NULL_POINTER_PASSED_TO_FUNC);
     MYASSERT(logs_file_pointer      != NULL, NULL_POINTER_PASSED_TO_FUNC , return NULL_POINTER_PASSED_TO_FUNC);
 
+    SDL_Renderer *renderer = NULL;
+    SDL_Window *window     = NULL;
+
     Global_logs_pointer = logs_file_pointer;
 
-    int memory[MEMORY_SIZE]       = {};
+    int *memory = (int *) calloc(MEMORY_SIZE, sizeof(int));
     int regs[NUMBER_OF_REGISTERS] = {};
 
     stack *stk = get_pointer_stack();
@@ -60,6 +62,12 @@ errors_code processor(FILE *byte_code_file_pointer, FILE *logs_file_pointer)
 
     stack_destructor(stk);
     bytecode_parametrs_destructor(&bytecode_info);
+
+    free(memory);
+
+    SDL_DestroyRenderer(renderer);
+    SDL_DestroyWindow(window);
+    SDL_Quit();
 
     return INVALID_OPERATOR;
 }

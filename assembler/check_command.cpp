@@ -40,7 +40,9 @@ errors_code put_command_in_buffer(char *string, assem_parametrs *assem, size_t l
         if (number_args > 0 && command_id & COMMAND_ARGS_NUMBER)
             push_in_bytecode_buffer(assem, number);
 
-        output_to_listing_file(string, number_args, line_number, listing_file_pointer, assem);
+        #ifdef LISTING
+            output_to_listing_file(string, number_args, line_number, listing_file_pointer, assem);
+        #endif
 
         return ASSERT_NO_ERROR;
     }

@@ -15,6 +15,12 @@ DEF_COMMAND(HLT,  -1, 0,
     stack_destructor(stk);
     bytecode_parametrs_destructor(&bytecode_info);
 
+    free(memory);
+
+    SDL_DestroyRenderer(renderer);
+    SDL_DestroyWindow(window);
+    SDL_Quit();
+
     return ASSERT_NO_ERROR;
 })
 
@@ -24,13 +30,13 @@ DEF_COMMAND(PUSH,  2, 1,
     {
         case(COMMAND_ARGS_MEMORY_REGISTER):
         {
-            sleep(1);
+            //usleep(2e5);
 
             int reg = pop_from_bytecode_buffer(&bytecode_info);
 
             if (1 <= reg && reg <= NUMBER_OF_REGISTERS)
             {
-                if((number_memory_cell = regs[reg - 1]) < MEMORY_SIZE && number_memory_cell > 0) {
+                if((number_memory_cell = regs[reg - 1] / DEGREE_ACCURACY) < MEMORY_SIZE && number_memory_cell >= 0) {
                     push_value = memory[number_memory_cell];
                 }
 
@@ -50,11 +56,11 @@ DEF_COMMAND(PUSH,  2, 1,
 
         case(COMMAND_ARGS_MEMORY_NUMBER):
         {
-            sleep(1);
+            //usleep(2e5);
 
             number_memory_cell = pop_from_bytecode_buffer(&bytecode_info);
 
-            if(number_memory_cell < MEMORY_SIZE && number_memory_cell > 0) {
+            if(number_memory_cell < MEMORY_SIZE && number_memory_cell >= 0) {
                 push_value = memory[number_memory_cell];
             }
 
@@ -84,7 +90,7 @@ DEF_COMMAND(PUSH,  2, 1,
 
         case(COMMAND_ARGS_NUMBER):
         {
-            push_value = pop_from_bytecode_buffer(&bytecode_info);
+            push_value = pop_from_bytecode_buffer(&bytecode_info) * DEGREE_ACCURACY;
 
             break;
         }
@@ -96,7 +102,7 @@ DEF_COMMAND(PUSH,  2, 1,
         }
     }
 
-    push(stk, push_value * DEGREE_ACCURACY);
+    push(stk, push_value);
 })
 
 DEF_COMMAND(SUB,   3, 0,
@@ -185,7 +191,7 @@ DEF_COMMAND(POP,  13, 1,
             int reg = pop_from_bytecode_buffer(&bytecode_info);
 
             if (1 <= reg && reg <= NUMBER_OF_REGISTERS) {
-                regs[reg - 1] = (int) ((float) pop_value_1 / ((float) DEGREE_ACCURACY));
+                regs[reg - 1] = pop_value_1;
             }
 
             else {
@@ -198,14 +204,14 @@ DEF_COMMAND(POP,  13, 1,
 
         case(COMMAND_ARGS_MEMORY_REGISTER):
         {
-            sleep(1);
+            //usleep(2e5);
 
             int reg = pop_from_bytecode_buffer(&bytecode_info);
 
             if (1 <= reg && reg <= NUMBER_OF_REGISTERS)
             {
-                if((number_memory_cell = regs[reg - 1]) < MEMORY_SIZE && number_memory_cell > 0) {
-                    memory[number_memory_cell] = (int) ((float) pop_value_1 / ((float) DEGREE_ACCURACY));
+                if(((number_memory_cell = (regs[reg - 1]) / DEGREE_ACCURACY)) < MEMORY_SIZE && number_memory_cell >= 0) {
+                    memory[number_memory_cell] = pop_value_1;
                 }
 
                 else {
@@ -224,12 +230,12 @@ DEF_COMMAND(POP,  13, 1,
 
         case(COMMAND_ARGS_MEMORY_NUMBER):
         {
-            sleep(1);
+            //usleep(2e5);
 
             number_memory_cell = pop_from_bytecode_buffer(&bytecode_info);
 
-            if(number_memory_cell < MEMORY_SIZE && number_memory_cell > 0) {
-                memory[number_memory_cell] = (int) ((float) pop_value_1 / ((float) DEGREE_ACCURACY));
+            if(number_memory_cell < MEMORY_SIZE && number_memory_cell >= 0) {
+                memory[number_memory_cell] = pop_value_1;
             }
 
             else {
@@ -291,16 +297,53 @@ DEF_COMMAND(RETURN, 22, 0,
 
 DEF_COMMAND(DRAW, 23, 0,
 {
-    for (ssize_t memory_index = 0; memory_index < MEMORY_SIZE; memory_index++)
+    for (size_t line_number = 0; line_number < COLUMN_WIDTH; line_number++)
     {
-        if (!memory[memory_index])
-            printf(".");
+        for (size_t column_number = 0; column_number < LINE_WIDTH; column_number++)
+        {
+            if (!memory[column_number + line_number * LINE_WIDTH])
+                printf(".");
 
-        else
-            printf("*");
+            else
+                printf("*");
+        }
+
+        printf("\n");
     }
 
     printf("\n");
+})
+
+DEF_COMMAND(DRAWF, 24, 0,
+{
+    SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+
+    for (size_t line_number = 0; line_number < COLUMN_WIDTH; line_number++)
+    {
+        for (size_t column_number = 0; column_number < LINE_WIDTH; column_number++)
+        {
+            if (memory[column_number + line_number * LINE_WIDTH])
+            {
+                SDL_Rect rect1 = {(int) column_number * SQUARE_SIZE, (int) line_number * SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE};
+                SDL_RenderFillRect(renderer, &rect1);
+            }
+        }
+    }
+
+    SDL_RenderPresent(renderer);
+
+    SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0);
+    usleep(82e3);
+
+    SDL_RenderClear(renderer);
+})
+
+DEF_COMMAND(INIT_DRAW, 25, 0,
+{
+    SDL_Init(SDL_INIT_VIDEO);
+    SDL_CreateWindowAndRenderer(SCREEN_WIDTH, SCREEN_HEIGHT, 0, &window, &renderer);
+    SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0);
+    SDL_RenderClear(renderer);
 })
 
 #undef POP_WITH_CHECK
