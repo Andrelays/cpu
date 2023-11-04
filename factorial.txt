@@ -1,28 +1,32 @@
 main:
     in
     pop rax
-    push 1
-    pop rbx
 
     call calculate_factorial:
     push rbx
     out
 hlt
 
-calculate_factorial:
+calculate_factorial:                ; in: rax = n| out: rbx = n!
     push rax
     push 1
-    jb end_calculate_factorial:
+    ja n_is_more_than_zero:
 
-    push rbx
-    push rax
-    mul
+    push 1
     pop rbx
+    jmp end_calculate_factorial:    ; if n < 1 -> n! = 1
+
+    n_is_more_than_zero:
+    push rax                        ;n
     push rax
     push 1
     sub
-    pop rax
-    call calculate_factorial:
+    pop  rax                        ;(n-1)
+    call calculate_factorial:       ;(n-1)!
+    push rbx
+    mul                             ;n * (n-1)!
+    pop rbx
 
     end_calculate_factorial:
+
 return

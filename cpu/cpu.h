@@ -9,10 +9,11 @@
 const ssize_t MEMORY_SIZE   = 3000;
 const ssize_t LINE_WIDTH    = 100;
 const ssize_t COLUMN_WIDTH  = MEMORY_SIZE / LINE_WIDTH;
-const int SQUARE_SIZE     = 20;
-const int SCREEN_WIDTH    = LINE_WIDTH   * SQUARE_SIZE;
-const int SCREEN_HEIGHT   = COLUMN_WIDTH * SQUARE_SIZE;
-const int DEGREE_ACCURACY = 100;
+const int SQUARE_SIZE       = 20;
+const int SCREEN_WIDTH      = LINE_WIDTH   * SQUARE_SIZE;
+const int SCREEN_HEIGHT     = COLUMN_WIDTH * SQUARE_SIZE;
+const int DEGREE_ACCURACY   = 100;
+const size_t FRAME_DELAY    = 30e3;
 
 struct bytecode_parametrs {
     int                 *buffer;

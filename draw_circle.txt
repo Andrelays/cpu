@@ -3,9 +3,11 @@ INIT_DRAW
 main:
     new_line:
     call count_the_point:
+
     push 1
     push rax
     add
+
     pop  rax
     push rax
     push 30
@@ -14,30 +16,34 @@ main:
     drawf
 hlt
 
-count_the_point:
+count_the_point:                                                    ; in: rax - y_coordinate; out: all memory
     push rbx
     push 50
     sub
-    push rbx
-    push 50
-    sub
-    mul
+    pop rcx
+    call calculate_square:
+    push rdx
+
     push rax
     push 15
     sub
-    push rax
-    push 15
-    sub
-    mul
+    pop rcx
+    call calculate_square:
+    push rdx
+
     add
     push 15
-    push 15
-    mul
+    pop rcx
+    call calculate_square:
+    push rdx
+
     jb put_point:
     push 0
     jmp point:
+
     put_point:
     push 1
+
     point:
     push rax
     push 100
@@ -50,6 +56,7 @@ count_the_point:
     push 1
     push rbx
     add
+
     pop  rbx
     push rbx
     push 100
@@ -57,5 +64,13 @@ count_the_point:
 
     push 0
     pop rbx
+
+return
+
+calculate_square:                                           ; in: rcx - number out: rdx - square_number
+    push rcx
+    push rcx
+    mul
+    pop  rdx
 
 return

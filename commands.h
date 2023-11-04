@@ -151,7 +151,7 @@ DEF_COMMAND(MUL,   8, 0,
     POP_WITH_CHECK(stk, &pop_value_2);
     POP_WITH_CHECK(stk, &pop_value_1);
 
-    push(stk, pop_value_1 * pop_value_2 / DEGREE_ACCURACY); //TODO check overflow
+    push(stk, pop_value_1 * pop_value_2 / DEGREE_ACCURACY);
 })
 
 DEF_COMMAND(ADD,   9, 0,
@@ -351,7 +351,7 @@ DEF_COMMAND(DRAWF, 24, 0,
     SDL_RenderPresent(renderer);
 
     SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0);
-    usleep(30e3);
+    usleep(FRAME_DELAY);
 
     SDL_RenderClear(renderer);
 })
