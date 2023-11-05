@@ -3,11 +3,13 @@
 #include <ctype.h>
 #include "assembler.h"
 
-errors_code put_command_in_buffer(char *string, assem_parametrs *assem, size_t line_number, FILE *listing_file_pointer)
+errors_code put_command_in_buffer(const char *string, assem_parametrs *assem, size_t line_number, FILE *listing_file_pointer)
 {
     MYASSERT(string                     != NULL, NULL_POINTER_PASSED_TO_FUNC, return NULL_POINTER_PASSED_TO_FUNC);
     MYASSERT(assem                      != NULL, NULL_POINTER_PASSED_TO_FUNC, return NULL_POINTER_PASSED_TO_FUNC);
     MYASSERT(assem->bytecode_buffer     != NULL, NULL_POINTER_PASSED_TO_FUNC, return NULL_POINTER_PASSED_TO_FUNC);
+    MYASSERT(listing_file_pointer       != NULL, NULL_POINTER_PASSED_TO_FUNC, return NULL_POINTER_PASSED_TO_FUNC);
+
 
     short command_id    = NO_OPERATOR;
     ssize_t arg_len     = 0;
@@ -18,7 +20,7 @@ errors_code put_command_in_buffer(char *string, assem_parametrs *assem, size_t l
 
     if ((command_id = check_command(string, &number_args)) != NO_OPERATOR)
     {
-        char *string_without_command = parsing_string_to_tokens(string, &arg_len, " \r\n\t");
+        const char *string_without_command = parsing_string_to_tokens(string, &arg_len, " \r\n\t");
 
         if (!check_command_args(string_without_command, number_args, &command_id, &number, &reg, assem, arg_len))
         {
@@ -52,7 +54,7 @@ errors_code put_command_in_buffer(char *string, assem_parametrs *assem, size_t l
     return INVALID_OPERATOR;
 }
 
-command check_command(char *string, size_t *number_args)
+command check_command(const char *string, size_t *number_args)
 {
     #define DEF_COMMAND(command, id, command_number_args, ...)                                      \
     do {                                                                                            \
@@ -73,7 +75,7 @@ command check_command(char *string, size_t *number_args)
     return NO_OPERATOR;
 }
 
-bool check_command_args(char *string_without_command, size_t number_args, short *command_id, int *number, char *reg, assem_parametrs *assem, ssize_t arg_len)
+bool check_command_args(const char *string_without_command, size_t number_args, short *command_id, int *number, char *reg, assem_parametrs *assem, ssize_t arg_len)
 {
     MYASSERT(assem                      != NULL, NULL_POINTER_PASSED_TO_FUNC, return false);
     MYASSERT(command_id                 != NULL, NULL_POINTER_PASSED_TO_FUNC, return false);
@@ -139,7 +141,7 @@ bool check_command_args(char *string_without_command, size_t number_args, short 
     return false;
 }
 
-bool check_is_register(char *string_without_command, char *reg, ssize_t arg_len)
+bool check_is_register(const char *string_without_command, char *reg, ssize_t arg_len)
 {
     MYASSERT(string_without_command != NULL, NULL_POINTER_PASSED_TO_FUNC, return false);
     MYASSERT(reg                    != NULL, NULL_POINTER_PASSED_TO_FUNC, return false);
@@ -155,7 +157,7 @@ bool check_is_register(char *string_without_command, char *reg, ssize_t arg_len)
     return false;
 }
 
-bool check_is_number(char *string_without_command, int *number, ssize_t arg_len)
+bool check_is_number(const char *string_without_command, int *number, ssize_t arg_len)
 {
     MYASSERT(string_without_command != NULL, NULL_POINTER_PASSED_TO_FUNC, return false);
     MYASSERT(number                 != NULL, NULL_POINTER_PASSED_TO_FUNC, return false);

@@ -18,7 +18,7 @@ ssize_t find_label(char *label, assem_parametrs *assem)
     return -1;
 }
 
-bool check_is_label(char *string, assem_parametrs *assem)
+bool check_is_label(const char *string, assem_parametrs *assem)
 {
     MYASSERT(string != NULL, NULL_POINTER_PASSED_TO_FUNC, return false);
     MYASSERT(assem  != NULL, NULL_POINTER_PASSED_TO_FUNC, return false);

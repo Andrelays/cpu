@@ -1,5 +1,5 @@
 main:
-    call entering_coefficiens:
+    call entering_coefficiens:                  ;000 1 0-4 001 0 5 10
     call check_roots:
     call output_roots:
 hlt

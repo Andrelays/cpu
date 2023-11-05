@@ -19,7 +19,7 @@ errors_code assembler(assem_parametrs *assem, FILE *byte_code_file_pointer, FILE
 
     for (size_t position = 0; position < source_code->number_lines; position++)
     {
-        char *string = ((source_code->string_array)[position]).string_pointer;
+        const char *string = ((source_code->string_array)[position]).string_pointer;
 
         if (!(string = check_is_empty_string(string)))
             continue;
@@ -38,7 +38,7 @@ errors_code assembler(assem_parametrs *assem, FILE *byte_code_file_pointer, FILE
     return ASSERT_NO_ERROR;
 }
 
-char *check_is_empty_string(char *string)
+const char *check_is_empty_string(const char *string)
 {
     MYASSERT(string != NULL, NULL_POINTER_PASSED_TO_FUNC, return NULL);
 

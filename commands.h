@@ -24,7 +24,7 @@ DEF_COMMAND(HLT,  -1, 0,
     return ASSERT_NO_ERROR;
 })
 
-DEF_COMMAND(PUSH,  2, 1,
+DEF_COMMAND(PUSH,  2, 1,                                                                                                        //TODO in func
 {
     switch(code_operator & COMMAND_ARGS_ALL)
     {

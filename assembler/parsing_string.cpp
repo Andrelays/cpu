@@ -1,12 +1,12 @@
 #include <string.h>
 #include "assembler.h"
 
-char *parsing_string_to_tokens(char *string, ssize_t *token_length, const char *separator)
+const char *parsing_string_to_tokens(const char *string, ssize_t *token_length, const char *separator)
 {
     MYASSERT(string       != NULL, NULL_POINTER_PASSED_TO_FUNC, return NULL);
     MYASSERT(separator    != NULL, NULL_POINTER_PASSED_TO_FUNC, return NULL);
 
-    char *token = strpbrk(string, separator);
+    const char *token = strpbrk(string, separator);
 
     // printf("string = %s\n", string);
 
@@ -27,14 +27,14 @@ char *parsing_string_to_tokens(char *string, ssize_t *token_length, const char *
     return token;
 }
 
-ssize_t find_token_size(char *token, const char *separator)
+ssize_t find_token_size(const char *token, const char *separator)
 {
     MYASSERT(token        != NULL, NULL_POINTER_PASSED_TO_FUNC, return -1);
     MYASSERT(separator    != NULL, NULL_POINTER_PASSED_TO_FUNC, return -1);
 
     ssize_t token_length = 0;
 
-    char *pointer_end_of_token = NULL;
+    const char *pointer_end_of_token = NULL;
 
     if ((pointer_end_of_token = strpbrk(token, separator)) != NULL)
         token_length = pointer_end_of_token - token;

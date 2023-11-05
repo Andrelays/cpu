@@ -1,22 +1,17 @@
 INIT_DRAW
 
 main:
-    new_line:
-    call count_the_point:
-
-    push 1
-    push rax
-    add
-
-    pop  rax
-    push rax
-    push 30
-    jb new_line:
+    call draw_circle:
 
     drawf
 hlt
 
-count_the_point:                                                    ; in: rax - y_coordinate; out: all memory
+draw_circle:                                                        ;out: all memory
+draw_new_line:
+    push 1
+    push rax
+    add
+put_the_point:
     push rbx
     push 50
     sub
@@ -60,10 +55,15 @@ count_the_point:                                                    ; in: rax - 
     pop  rbx
     push rbx
     push 100
-    jb count_the_point:
+    jb put_the_point:
 
     push 0
     pop rbx
+
+    pop  rax
+    push rax
+    push 30
+    jb draw_new_line:
 
 return
 
