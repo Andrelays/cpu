@@ -30,7 +30,7 @@ errors_code disassembler(FILE *byte_code_file_pointer, FILE *source_code_file_po
                 define_and_print_arg(source_code_file_pointer, code_operator, arg);         \
             }                                                                               \
                                                                                             \
-            fprintf(source_code_file_pointer, "\n");                                        \
+            fprintf(source_code_file_pointer, "\n");                                        \ //TODO rename -pointer
                                                                                             \
             break;                                                                          \
         }
@@ -91,7 +91,7 @@ errors_code bytecode_parametrs_destructor(bytecode_parametrs *bytecode_info)
 
 int pop_from_bytecode_buffer(bytecode_parametrs *bytecode_info)
 {
-    MYASSERT(bytecode_info         != NULL, NULL_POINTER_PASSED_TO_FUNC, return 0);
+    MYASSERT(bytecode_info         != NULL, NULL_POINTER_PASSED_TO_FUNC, return 0);                 //TODO bytecode.cpp
     MYASSERT(bytecode_info->buffer != NULL, NULL_POINTER_PASSED_TO_FUNC, return 0);
 
     if (bytecode_info->buffer_position >= bytecode_info->buffer_size)
