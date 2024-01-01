@@ -1,15 +1,15 @@
-//WARNING HLT 31st command!!!
 
-DEF_COMMAND(HLT,  -1, 0,
+
+DEF_COMMAND(HLT,  31, 0,
 {
-    bytecode_parametrs_destructor(&processor_info);
+    processor_parametrs_destructor(&processor_info);
 
     return ASSERT_NO_ERROR;
 })
 
-DEF_COMMAND(PUSH,  2, 1,                                                                                                        //TODO in func
+DEF_COMMAND(PUSH,  2, 1,
 {
-    push(stk, arg_info.arg);
+    push(stk, *pointer_to_arg);
 })
 
 DEF_COMMAND(SUB,   3, 0,
@@ -91,33 +91,29 @@ DEF_COMMAND(POP,  13, 1,
 {
     POP_WITH_CHECK(stk, &pop_value_1);
 
-    if (arg_info.arg == NULL)
+    if (pointer_to_arg == NULL)
     {
         printf(RED "ERROR: INCORRECT ARG IN POP\n" RESET_COLOR);
-        return false;
+        return INVALID_OPERATOR;
     }
 
-    arg_info.arg = pop_value_1;
+    *pointer_to_arg = pop_value_1;
 })
 
 DEF_COMMAND(JMP,  14, 1,
 {
-    bytecode_info.buffer_position = (size_t) bytecode_info.buffer[bytecode_info.buffer_position];
+    processor_info.buffer_position = (size_t) *pointer_to_arg;
 })
 
-#define JUMP_WITH_CONDITION(name, id, sign)                                                             \
-DEF_COMMAND(name, id, 1,                                                                                \
-{                                                                                                       \
-    POP_WITH_CHECK(stk, &pop_value_2);                                                                  \
-    POP_WITH_CHECK(stk, &pop_value_1);                                                                  \
-                                                                                                        \
-    if (pop_value_1 sign pop_value_2) {                                                                 \
-        bytecode_info.buffer_position = (size_t) bytecode_info.buffer[bytecode_info.buffer_position];   \
-    }                                                                                                   \
-                                                                                                        \
-    else {                                                                                              \
-        ++bytecode_info.buffer_position;                                                                \
-    }                                                                                                   \
+#define JUMP_WITH_CONDITION(name, id, sign)                                                                 \
+DEF_COMMAND(name, id, 1,                                                                                    \
+{                                                                                                           \
+    POP_WITH_CHECK(stk, &pop_value_2);                                                                      \
+    POP_WITH_CHECK(stk, &pop_value_1);                                                                      \
+                                                                                                            \
+    if (pop_value_1 sign pop_value_2) {                                                                     \
+        processor_info.buffer_position = (size_t) *pointer_to_arg;                                          \
+    }                                                                                                       \
 })
 
 JUMP_WITH_CONDITION(JA,  15, >)
@@ -131,14 +127,14 @@ JUMP_WITH_CONDITION(JNE, 20, !=)
 
 DEF_COMMAND(CALL,  21, 1,
 {
-    push(stk, (int) bytecode_info.buffer_position + 1);
-    bytecode_info.buffer_position = (size_t) bytecode_info.buffer[bytecode_info.buffer_position];
+    push(stk, (int) processor_info.buffer_position);
+    processor_info.buffer_position = (size_t) *pointer_to_arg;
 })
 
 DEF_COMMAND(RETURN, 22, 0,
 {
     POP_WITH_CHECK(stk, &pop_value_1);
-    bytecode_info.buffer_position = (size_t) pop_value_1;
+    processor_info.buffer_position = (size_t) pop_value_1;
 })
 
 DEF_COMMAND(DRAW, 23, 0,
@@ -162,7 +158,7 @@ DEF_COMMAND(DRAW, 23, 0,
 
 DEF_COMMAND(DRAWF, 24, 0,
 {
-    SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+    SDL_SetRenderDrawColor(processor_info.renderer, 255, 255, 255, 255);
 
     for (size_t line_number = 0; line_number < COLUMN_WIDTH; line_number++)
     {
@@ -171,7 +167,7 @@ DEF_COMMAND(DRAWF, 24, 0,
             if (memory[column_number + line_number * LINE_WIDTH])
             {
                 SDL_Rect rect1 = {(int) column_number * SQUARE_SIZE, (int) line_number * SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE};
-                SDL_RenderFillRect(renderer, &rect1);
+                SDL_RenderFillRect(processor_info.renderer, &rect1);
             }
         }
     }
@@ -180,34 +176,28 @@ DEF_COMMAND(DRAWF, 24, 0,
     while(SDL_PollEvent(&e)) {
         if(e.type == SDL_QUIT)
         {
-            stack_destructor(stk);
-            bytecode_parametrs_destructor(&bytecode_info);
-
-            free(memory);
-
-            SDL_DestroyRenderer(renderer);
-            SDL_DestroyWindow(window);
-            SDL_Quit();
+            processor_parametrs_destructor(&processor_info);
             exit(0);
+
             return ASSERT_NO_ERROR;
         }
     }
 
 
-    SDL_RenderPresent(renderer);
+    SDL_RenderPresent(processor_info.renderer);
 
-    SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0);
+    SDL_SetRenderDrawColor(processor_info.renderer, 0, 0, 0, 0);
     usleep(FRAME_DELAY);
 
-    SDL_RenderClear(renderer);
+    SDL_RenderClear(processor_info.renderer);
 })
 
 DEF_COMMAND(INIT_DRAW, 25, 0,
 {
     SDL_Init(SDL_INIT_VIDEO);
-    SDL_CreateWindowAndRenderer(SCREEN_WIDTH, SCREEN_HEIGHT, 0, &window, &renderer);
-    SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0);
-    SDL_RenderClear(renderer);
+    SDL_CreateWindowAndRenderer(SCREEN_WIDTH, SCREEN_HEIGHT, 0, &(processor_info.window), &(processor_info.renderer));
+    SDL_SetRenderDrawColor(processor_info.renderer, 0, 0, 0, 0);
+    SDL_RenderClear(processor_info.renderer);
 })
 
 #undef POP_WITH_CHECK

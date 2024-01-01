@@ -23,7 +23,6 @@ const ssize_t COLUMN_WIDTH    = MEMORY_SIZE / LINE_WIDTH;
 const int     SQUARE_SIZE     = 20;
 const int     SCREEN_WIDTH    = LINE_WIDTH   * SQUARE_SIZE;
 const int     SCREEN_HEIGHT   = COLUMN_WIDTH * SQUARE_SIZE;
-const int     DEGREE_ACCURACY = 100;
 const size_t  FRAME_DELAY     = 30e3;
 
 struct processor_parametrs {
@@ -37,15 +36,10 @@ struct processor_parametrs {
     size_t               buffer_position;
 };
 
-struct argument {
-    int                 arg;
-    int                *pointer_to_arg;
-};
-
 errors_code processor(FILE *byte_code_file_pointer, FILE *logs_file_pointer);
 errors_code processor_parametrs_constructor(FILE *byte_code_file_pointer, processor_parametrs *processor_info);
-errors_code bytecode_parametrs_destructor(processor_parametrs *processor_info);
+errors_code processor_parametrs_destructor(processor_parametrs *processor_info);
 int pop_from_bytecode_buffer(processor_parametrs *processor_info);
-bool check_args(int code_operator, processor_parametrs *processor_info, argument *arg_info);
+bool check_args(int code_operator, processor_parametrs *processor_info, int **pointer_to_arg);
 
 #endif //ASSEMBLER_H_INCLUDED

@@ -10,10 +10,9 @@ errors_code put_command_in_buffer(const char *string, assem_parametrs *assem, si
     MYASSERT(assem->bytecode_buffer     != NULL, NULL_POINTER_PASSED_TO_FUNC, return NULL_POINTER_PASSED_TO_FUNC);
     MYASSERT(listing_file_pointer       != NULL, NULL_POINTER_PASSED_TO_FUNC, return NULL_POINTER_PASSED_TO_FUNC);
 
-
     short command_id    = NO_OPERATOR;
     ssize_t arg_len     = 0;
-    int number          = 0;
+    double number       = 0;
     char reg            = 0;
     size_t number_args  = 0;
 
@@ -28,6 +27,7 @@ errors_code put_command_in_buffer(const char *string, assem_parametrs *assem, si
             return INVALID_OPERATOR;
         }
 
+        // > 1 args
         if (string_without_command && parsing_string_to_tokens(string_without_command, NULL, " \r\n\t"))
         {
             printf(RED "%lu: ERROR COMMAND: %s\n" RESET_COLOR, line_number, string);
@@ -36,13 +36,15 @@ errors_code put_command_in_buffer(const char *string, assem_parametrs *assem, si
 
         push_in_bytecode_buffer(assem, command_id);
 
-        if (number_args > 0 && command_id & COMMAND_ARGS_REGISTER)
+        if (number_args > 0 && command_id & COMMAND_ARGS_REGISTER) {
             push_in_bytecode_buffer(assem, reg - 'a' + 1);
+        }
 
-        if (number_args > 0 && command_id & COMMAND_ARGS_NUMBER)
-            push_in_bytecode_buffer(assem, number);
+        if (number_args > 0 && command_id & COMMAND_ARGS_IMMEDIATE) {
+            push_in_bytecode_buffer(assem, (int) number);
+        }
 
-        #ifdef LISTING
+        #ifdef DEBUG_LISTING
             output_to_listing_file(string, number_args, line_number, listing_file_pointer, assem);
         #endif
 
@@ -57,7 +59,6 @@ errors_code put_command_in_buffer(const char *string, assem_parametrs *assem, si
 command check_command(const char *string, size_t *number_args)
 {
     #define DEF_COMMAND(command, id, command_number_args, ...)                                      \
-    do {                                                                                            \
         if (strncmp_case_insensitive(string, #command, sizeof #command - 1) == 0) {                 \
             if(string[sizeof #command - 1] == '\0' || isspace(string[sizeof #command - 1]))         \
             {                                                                                       \
@@ -66,7 +67,6 @@ command check_command(const char *string, size_t *number_args)
                 return command;                                                                     \
             }                                                                                       \
         }                                                                                           \
-    } while(0);
 
     #include "../commands.h"
 
@@ -75,7 +75,7 @@ command check_command(const char *string, size_t *number_args)
     return NO_OPERATOR;
 }
 
-bool check_command_args(const char *string_without_command, size_t number_args, short *command_id, int *number, char *reg, assem_parametrs *assem, ssize_t arg_len)
+bool check_command_args(const char *string_without_command, size_t number_args, short *command_id, double *number, char *reg, assem_parametrs *assem, ssize_t arg_len)
 {
     MYASSERT(assem                      != NULL, NULL_POINTER_PASSED_TO_FUNC, return false);
     MYASSERT(command_id                 != NULL, NULL_POINTER_PASSED_TO_FUNC, return false);
@@ -87,15 +87,22 @@ bool check_command_args(const char *string_without_command, size_t number_args, 
 
     if (!string_without_command)
     {
-        if (number_args == 0)
+        if (number_args == 0) {
             return true;
+        }
 
-        else
-            return false;
+        return false;
     }
 
     if (number_args == 1)
     {
+        if (string_without_command[0] == '[' && string_without_command[arg_len - 1] == ']')
+        {
+            *command_id |= COMMAND_ARGS_MEMORY;
+            arg_len -= 2;
+            ++string_without_command;
+        }
+
         if (check_is_register(string_without_command, reg, arg_len))
         {
             *command_id |= COMMAND_ARGS_REGISTER;
@@ -107,34 +114,17 @@ bool check_command_args(const char *string_without_command, size_t number_args, 
         {
             strncpy(label, string_without_command, (size_t) arg_len - 1);
 
-            *command_id |= COMMAND_ARGS_NUMBER;
-            *number = (int) find_label(label, assem);
+            *command_id |= COMMAND_ARGS_IMMEDIATE;
+            *number = (double) find_label(label, assem);
 
             return true;
         }
 
-        if(check_is_number(string_without_command, number, arg_len))
+        if(check_is_number(string_without_command, *command_id, number, arg_len))
         {
-            *command_id |= COMMAND_ARGS_NUMBER;
+            *command_id |= COMMAND_ARGS_IMMEDIATE;
 
             return true;
-        }
-
-        if(string_without_command[0] == '[' && string_without_command[arg_len - 1] == ']')
-        {
-            if(check_is_register(string_without_command + 1, reg, arg_len - 2))
-            {
-                *command_id |= COMMAND_ARGS_MEMORY_REGISTER;
-
-                return true;
-            }
-
-            if(check_is_number(string_without_command + 1, number, arg_len - 2))
-            {
-                *command_id |= COMMAND_ARGS_MEMORY_NUMBER;
-
-                return true;
-            }
         }
     }
 
@@ -157,17 +147,24 @@ bool check_is_register(const char *string_without_command, char *reg, ssize_t ar
     return false;
 }
 
-bool check_is_number(const char *string_without_command, int *number, ssize_t arg_len)
+bool check_is_number(const char *string_without_command, short command_id, double *number, ssize_t arg_len)
 {
     MYASSERT(string_without_command != NULL, NULL_POINTER_PASSED_TO_FUNC, return false);
     MYASSERT(number                 != NULL, NULL_POINTER_PASSED_TO_FUNC, return false);
 
     char *pointer_to_end_of_number = NULL;
 
-    *number = (int) strtol(string_without_command, &pointer_to_end_of_number, 10);
+    if (command_id & COMMAND_ARGS_MEMORY) {
+        *number = strtod(string_without_command, &pointer_to_end_of_number);
+    }
 
-    if (pointer_to_end_of_number == string_without_command + arg_len)
+    else {
+        *number = strtod(string_without_command, &pointer_to_end_of_number) * DEGREE_ACCURACY;
+    }
+
+    if (pointer_to_end_of_number == string_without_command + arg_len) {
         return true;
+    }
 
     return false;
 }
