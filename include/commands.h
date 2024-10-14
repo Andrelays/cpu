@@ -102,7 +102,7 @@ DEF_COMMAND(POP,  13, 1,
 
 DEF_COMMAND(JMP,  14, 1,
 {
-    processor_info.buffer_position = (size_t) *pointer_to_arg;
+    processor_info.buffer_position = (size_t) *pointer_to_arg / DEGREE_ACCURACY;
 })
 
 #define JUMP_WITH_CONDITION(name, id, sign)                                                                 \
@@ -112,7 +112,7 @@ DEF_COMMAND(name, id, 1,                                                        
     POP_WITH_CHECK(stk, &pop_value_1);                                                                      \
                                                                                                             \
     if (pop_value_1 sign pop_value_2) {                                                                     \
-        processor_info.buffer_position = (size_t) *pointer_to_arg;                                          \
+        processor_info.buffer_position = (size_t) *pointer_to_arg / DEGREE_ACCURACY;                        \
     }                                                                                                       \
 })
 
@@ -128,7 +128,7 @@ JUMP_WITH_CONDITION(JNE, 20, !=)
 DEF_COMMAND(CALL,  21, 1,
 {
     push(stk, (int) processor_info.buffer_position);
-    processor_info.buffer_position = (size_t) *pointer_to_arg;
+    processor_info.buffer_position = (size_t) *pointer_to_arg / DEGREE_ACCURACY;
 })
 
 DEF_COMMAND(RETURN, 22, 0,

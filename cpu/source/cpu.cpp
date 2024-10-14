@@ -1,9 +1,7 @@
 #include <unistd.h>
 #include <math.h>
-#include <stdio.h>
 #include "cpu.h"
-#include "../libraries/Onegin/onegin.h"
-#include "../libraries/Stack/stack.h"
+#include "onegin.h"
 
 errors_code processor(FILE *byte_code_file_pointer, FILE *logs_file_pointer)
 {
@@ -42,7 +40,7 @@ errors_code processor(FILE *byte_code_file_pointer, FILE *logs_file_pointer)
 
         switch (code_operator & ~COMMAND_ARGS_ALL)
         {
-            #include "../commands.h"
+            #include "commands.h"
 
             default:
                 printf(RED "ERROR! Incorrect command: \"%d\" buffer_position = %lu\n" RESET_COLOR, code_operator, processor_info.buffer_position);
@@ -63,8 +61,8 @@ errors_code processor(FILE *byte_code_file_pointer, FILE *logs_file_pointer)
 
 errors_code processor_parametrs_constructor(FILE *byte_code_file_pointer, processor_parametrs *processor_info)
 {
-    MYASSERT(byte_code_file_pointer != NULL, NULL_POINTER_PASSED_TO_FUNC , return NULL_POINTER_PASSED_TO_FUNC);
-    MYASSERT(processor_info         != NULL, NULL_POINTER_PASSED_TO_FUNC , return NULL_POINTER_PASSED_TO_FUNC);
+    MYASSERT(byte_code_file_pointer != NULL, NULL_POINTER_PASSED_TO_FUNC, return NULL_POINTER_PASSED_TO_FUNC);
+    MYASSERT(processor_info         != NULL, NULL_POINTER_PASSED_TO_FUNC, return NULL_POINTER_PASSED_TO_FUNC);
 
     size_t file_size = determine_size(byte_code_file_pointer);
 

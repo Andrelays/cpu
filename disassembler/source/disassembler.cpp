@@ -1,9 +1,9 @@
-#include "disassembler.h"
-#include "../libraries/Stack/myassert.h"
-#include "../libraries/Onegin/onegin.h"
-#include "../libraries/Stack/stack.h"
 #include <math.h>
 #include <string.h>
+#include "disassembler.h"
+#include "myassert.h"
+#include "onegin.h"
+#include "stack.h"
 
 errors_code disassembler(FILE *byte_code_file_pointer, FILE *source_code_file_pointer)
 {
@@ -23,14 +23,9 @@ errors_code disassembler(FILE *byte_code_file_pointer, FILE *source_code_file_po
         {                                                                                   \
             fprintf(source_code_file_pointer, "%s ", #command);                             \
                                                                                             \
-            if (number_args == 1)                                                           \
-            {                                                                               \
-                int arg = pop_from_bytecode_buffer(&bytecode_info);                         \
+            check_and_print_arg(source_code_file_pointer, code_operator, &bytecode_info);   \
                                                                                             \
-                define_and_print_arg(source_code_file_pointer, code_operator, arg);         \
-            }                                                                               \
-                                                                                            \
-            fprintf(source_code_file_pointer, "\n");                                        \ //TODO rename -pointer
+            fprintf(source_code_file_pointer, "\n");                                        \
                                                                                             \
             break;                                                                          \
         }
@@ -41,7 +36,7 @@ errors_code disassembler(FILE *byte_code_file_pointer, FILE *source_code_file_po
 
         switch (code_operator & ~COMMAND_ARGS_ALL)
         {
-            #include "../commands.h"
+            #include "commands.h"
 
             default:
                 printf(RED "ERROR! Incorrect command: \"%d\" buffer_position = %lu\n" RESET_COLOR, code_operator, bytecode_info.buffer_position);
@@ -91,7 +86,7 @@ errors_code bytecode_parametrs_destructor(bytecode_parametrs *bytecode_info)
 
 int pop_from_bytecode_buffer(bytecode_parametrs *bytecode_info)
 {
-    MYASSERT(bytecode_info         != NULL, NULL_POINTER_PASSED_TO_FUNC, return 0);                 //TODO bytecode.cpp
+    MYASSERT(bytecode_info         != NULL, NULL_POINTER_PASSED_TO_FUNC, return 0);
     MYASSERT(bytecode_info->buffer != NULL, NULL_POINTER_PASSED_TO_FUNC, return 0);
 
     if (bytecode_info->buffer_position >= bytecode_info->buffer_size)
@@ -107,9 +102,21 @@ int pop_from_bytecode_buffer(bytecode_parametrs *bytecode_info)
     return pop_value;
 }
 
-errors_code define_and_print_arg(FILE *source_code_file_pointer, int code_operator, int arg)
+errors_code check_and_print_arg(FILE *source_code_file_pointer, int code_operator, bytecode_parametrs *bytecode_info)
 {
     MYASSERT(source_code_file_pointer != NULL, NULL_POINTER_PASSED_TO_FUNC , return NULL_POINTER_PASSED_TO_FUNC);
+    MYASSERT(bytecode_info            != NULL, NULL_POINTER_PASSED_TO_FUNC,  return NULL_POINTER_PASSED_TO_FUNC);
+
+
+    if (!(code_operator & COMMAND_ARGS_ALL)) {
+        return ASSERT_NO_ERROR;
+    }
+
+    int arg = pop_from_bytecode_buffer(bytecode_info);
+
+    static int counter_func = 0;
+
+    counter_func++;
 
     switch(code_operator & COMMAND_ARGS_ALL)
     {
@@ -133,7 +140,7 @@ errors_code define_and_print_arg(FILE *source_code_file_pointer, int code_operat
         {
             int number_memory_cell = arg;
 
-            if(number_memory_cell > 0) {
+            if(number_memory_cell >= 0) {
                 fprintf(source_code_file_pointer, "[%d]", number_memory_cell);
             }
 
@@ -161,9 +168,9 @@ errors_code define_and_print_arg(FILE *source_code_file_pointer, int code_operat
             break;
         }
 
-        case(COMMAND_ARGS_NUMBER):
+        case(COMMAND_ARGS_IMMEDIATE):
         {
-            fprintf(source_code_file_pointer, "%d", arg);
+            fprintf(source_code_file_pointer, "%d", arg / DEGREE_ACCURACY);
 
             break;
         }

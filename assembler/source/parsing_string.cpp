@@ -8,18 +8,13 @@ const char *parsing_string_to_tokens(const char *string, ssize_t *token_length, 
 
     const char *token = strpbrk(string, separator);
 
-    // printf("string = %s\n", string);
-
     if (token == NULL)
         return token;
 
-    // printf("strspn = %lu\n", strspn(token, separator));
     token += strspn(token, separator);
 
     if (*token == '\0')
         return NULL;
-
-    // printf("token = <%s>\n", token);
 
     if (token_length != NULL)
         *token_length = find_token_size(token, separator);

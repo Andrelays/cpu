@@ -1,8 +1,6 @@
-// #define CONSOLE_OUTPUT
-
 #include <climits>
 #include "assembler.h"
-#include "../libraries/Stack/colors.h"
+#include "colors.h"
 
 FILE *Global_logs_pointer  = stderr;
 bool  Global_color_output  = false;

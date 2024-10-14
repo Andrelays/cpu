@@ -68,7 +68,7 @@ command check_command(const char *string, size_t *number_args)
             }                                                                                       \
         }                                                                                           \
 
-    #include "../commands.h"
+    #include "commands.h"
 
     #undef DEF_COMMAND
 
@@ -115,7 +115,7 @@ bool check_command_args(const char *string_without_command, size_t number_args, 
             strncpy(label, string_without_command, (size_t) arg_len - 1);
 
             *command_id |= COMMAND_ARGS_IMMEDIATE;
-            *number = (double) find_label(label, assem);
+            *number = (double) find_label(label, assem) * DEGREE_ACCURACY;
 
             return true;
         }

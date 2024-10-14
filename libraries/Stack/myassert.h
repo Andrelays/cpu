@@ -38,7 +38,7 @@ enum errors_code {
     COULD_NOT_OPEN_THE_FILE         =  7,
     COULD_NOT_CLOSE_THE_FILE        =  8,
     HASH_HAS_BEEN_CHANGED           =  9,
-    INVALID_OPERATOR                = 10
+    INVALID_OPERATOR                =  10
 };
 
 

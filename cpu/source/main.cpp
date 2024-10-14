@@ -1,7 +1,5 @@
 #include "cpu.h"
-#include "../libraries/Stack/myassert.h"
-#include "../libraries/Onegin/onegin.h"
-#include "../libraries/Stack/stack.h"
+#include "onegin.h"
 
 int main(int argc, const char *argv[])
 {

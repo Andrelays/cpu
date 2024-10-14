@@ -3,9 +3,9 @@
 
 #include <stdio.h>
 #include <SDL2/SDL.h>
-#include "../enum.h"
-#include "../libraries/Stack/stack.h"
-#include "../libraries/Stack/myassert.h"
+#include "enum.h"
+#include "stack.h"
+#include "myassert.h"
 
 #define POP_WITH_CHECK(stk, pop_value)                              \
  do {                                                               \

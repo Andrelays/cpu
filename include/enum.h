@@ -4,7 +4,7 @@
 #include <stdio.h>
 
 const ssize_t NUMBER_OF_REGISTERS = 4;
-const int DEGREE_ACCURACY         = 100;
+const int     DEGREE_ACCURACY     = 100;
 
 #define DEF_COMMAND(command, id, number_args, ...) command = id,
 

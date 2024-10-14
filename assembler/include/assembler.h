@@ -1,9 +1,10 @@
 #ifndef ASSEMBLER_H_INCLUDED
 #define ASSEMBLER_H_INCLUDED
 
-#include "../libraries/Onegin/onegin.h"
-#include "../libraries/Stack/myassert.h"
-#include "../enum.h"
+#include <stdio.h>
+#include "enum.h"
+#include "onegin.h"
+#include "myassert.h"
 
 const ssize_t MAX_SIZE_LABELS =     100;
 const ssize_t SIZE_ARRAY_LABELS =   50;
@@ -27,8 +28,8 @@ errors_code assembler (assem_parametrs *assem, FILE *byte_code_file_pointer, FIL
 
 errors_code put_command_in_buffer(const char *string, assem_parametrs *assem, size_t line_number, FILE *listing_file_pointer);
 command check_command       (const char *string, size_t *number_args);
-bool check_command_args(const char *string_without_command, size_t number_args, short *command_id, double *number, char *reg, assem_parametrs *assem, ssize_t arg_len);
-bool    check_is_register   (const char *string_without_command, char *reg,   ssize_t arg_len);
+bool check_command_args  (const char *string_without_command, size_t number_args, short *command_id, double *number, char *reg, assem_parametrs *assem, ssize_t arg_len);
+bool check_is_register   (const char *string_without_command, char *reg,   ssize_t arg_len);
 bool check_is_number(const char *string_without_command, short command_id, double *number, ssize_t arg_len);
 int strncmp_case_insensitive(const char *str_1, const char *str_2, size_t number_comparisons);
 

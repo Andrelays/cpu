@@ -1,7 +1,5 @@
 #include "assembler.h"
-#include "../libraries/Stack/myassert.h"
-#include "../libraries/Onegin/onegin.h"
-#include "../libraries/Stack/stack.h"
+#include "stack.h"
 
 int main(int argc, const char *argv[])
 {
@@ -21,7 +19,7 @@ int main(int argc, const char *argv[])
     const char *file_name_listing   = argv[3];
 
     FILE *source_code_file_pointer = check_isopen_old(file_name_input,   "r");
-    FILE *byte_code_file_pointer   = check_isopen_old(file_name_output,  "wb"); //TODO BIN
+    FILE *byte_code_file_pointer   = check_isopen_old(file_name_output,  "wb");
     FILE *listing_file_pointer     = check_isopen    (file_name_listing, "w");
 
     MYASSERT(source_code_file_pointer != NULL, COULD_NOT_OPEN_THE_FILE , return COULD_NOT_OPEN_THE_FILE);
